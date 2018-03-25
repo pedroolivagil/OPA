@@ -22,4 +22,6 @@ public interface EntityManager {
     <T extends BasicEntity> T merge(T entity);
 
     <T extends BasicEntity> T remove(T entity);
+
+    void flush();
 }

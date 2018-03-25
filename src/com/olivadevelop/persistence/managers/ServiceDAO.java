@@ -5,6 +5,7 @@ import com.olivadevelop.persistence.interfaces.EntityManager;
 import com.olivadevelop.persistence.utils.*;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,6 +13,8 @@ import java.util.List;
  * Created by Oliva on 23/01/2018.
  */
 public final class ServiceDAO implements EntityManager {
+
+    Logger<EntityManager> logger = new Logger<>(EntityManager.class);
 
     private Service service;
 
@@ -46,23 +49,38 @@ public final class ServiceDAO implements EntityManager {
             query.orderBy(field.getKey(), QueryBuilder.Query.ORDER_BY.ASC);
             retorno = service.execute(query.toString());
         } catch (OlivaDevelopException | IllegalAccessException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return jsonPersistence.getEntity(retorno);
     }
 
     @Override
     public <T extends BasicEntity> T persist(T entity) {
-        return null;
+        service.add(entity, Service.MODE.PERSIST);
+        return entity;
     }
 
     @Override
     public <T extends BasicEntity> T merge(T entity) {
-        return null;
+        service.add(entity, Service.MODE.MERGE);
+        return entity;
     }
 
     @Override
     public <T extends BasicEntity> T remove(T entity) {
-        return null;
+        service.add(entity, Service.MODE.REMOVE);
+        return entity;
     }
+
+    /**
+     * Ejecuta las operaciones en la BBDD.
+     * <p>
+     * Inicia una transacción e intenta persistir, actualizar o borrar las entidades que tenga el entity manager.
+     * Es necesario llamar a este método para ejecutar los cambios en BBDD
+     */
+    @Override
+    public void flush() {
+        service.execute();
+    }
+
 }

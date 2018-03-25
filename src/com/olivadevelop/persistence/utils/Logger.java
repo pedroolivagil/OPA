@@ -14,4 +14,9 @@ public class Logger<T> {
         System.out.print(text);
         System.out.println();
     }
+
+    public void error(Exception e) {
+        print(e.getMessage());
+        e.printStackTrace();
+    }
 }

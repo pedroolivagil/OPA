@@ -16,7 +16,7 @@ import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeExcep
 @SuppressWarnings("Duplicates")
 public abstract class QueryBuilder {
 
-    public static class Query {
+    public static final class Query {
 
         public enum ORDER_BY {
             ASC, DESC
@@ -136,7 +136,7 @@ public abstract class QueryBuilder {
         }
     }
 
-    public static class Insert {
+    public static final class Insert {
 
         private String from;
         private List<String> columns;
@@ -199,7 +199,7 @@ public abstract class QueryBuilder {
         }
     }
 
-    public static class Update {
+    public static final class Update {
 
         private String from;
         private List<String> values;
@@ -286,7 +286,7 @@ public abstract class QueryBuilder {
         }
     }
 
-    public static class Delete {
+    public static final class Delete {
 
         private String from;
         private StringBuilder where;
