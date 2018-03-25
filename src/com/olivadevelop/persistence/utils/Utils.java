@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.*;
+
 /**
  * Copyright OlivaDevelop 2014-2018
  * Created by Oliva on 22/02/2018.
@@ -79,6 +81,26 @@ public class Utils {
             if (bool) {
                 retorno = true;
                 break;
+            }
+        }
+        return retorno;
+    }
+
+    public static boolean isNumeric(Object o) {
+        return o != null && String.valueOf(o).matches("[-+]?\\d*\\.?\\d+");
+    }
+
+    public static boolean isBoolean(Object o) {
+        return o != null && (o.equals(true) || o.equals(false));
+    }
+
+    public static String parseBoolean(Object o) {
+        String retorno = null;
+        if (o != null) {
+            if (o.equals(true)) {
+                retorno = "1";
+            } else if (o.equals(false)) {
+                retorno = "0";
             }
         }
         return retorno;

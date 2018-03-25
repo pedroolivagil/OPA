@@ -7,7 +7,7 @@ package com.olivadevelop.persistence.utils;
 
 public class OlivaDevelopException extends Exception {
     public enum TypeException {
-        PERSISTENCE, RELATIONSHIP, UNIQUE_NOT_NULL
+        PERSISTENCE, RELATIONSHIP, UNIQUE_NOT_NULL, PARSEABLE
     }
 
     private TypeException typeException;

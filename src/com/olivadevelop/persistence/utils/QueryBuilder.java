@@ -3,6 +3,8 @@ package com.olivadevelop.persistence.utils;
 import com.olivadevelop.persistence.annotations.Entity;
 import com.olivadevelop.persistence.entities.BasicEntity;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
@@ -50,12 +52,16 @@ public abstract class QueryBuilder {
             return this;
         }
 
-        public <T extends BasicEntity> Query from(T opa) throws OlivaDevelopException {
+        public <T extends BasicEntity> Query from(Class<T> opa) throws OlivaDevelopException {
             try {
                 if (Utils.isNotNull(opa)) {
-                    Entity entity = opa.getClass().getAnnotation(Entity.class);
+                    Entity entity = opa.getAnnotation(Entity.class);
                     if (Utils.isNotNull(entity)) {
-                        this.from = entity.table() + " " + entity.table();
+                        if (Utils.isNotNull(entity.table())) {
+                            this.from = " FROM " + entity.table() + " " + entity.table();
+                        } else {
+                            throw new OlivaDevelopException(PERSISTENCE, "La entidad no tiene una tabla relacionada");
+                        }
                     } else {
                         throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
                     }
@@ -80,6 +86,7 @@ public abstract class QueryBuilder {
         public Query where(String condition) throws OlivaDevelopException {
             if (Utils.isNotNull(condition)) {
                 this.where = new StringBuilder();
+                this.where.append(" WHERE ");
                 this.where.append(condition);
             }
             return this;
@@ -123,12 +130,85 @@ public abstract class QueryBuilder {
             if (Utils.isNotNull(this.orderBy)) {
                 query.append(this.orderBy);
             }
+            query.append(";");
             return query.toString();
         }
     }
 
     public static class Insert {
 
+        private String from;
+        private List<String> columns;
+        private List<Object> values;
+
+        public <T extends BasicEntity> Insert values(T data) throws OlivaDevelopException, IllegalAccessException {
+            if (Utils.isNull(from)) {
+                throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
+            }
+            columns = new ArrayList<>();
+            values = new ArrayList<>();
+            for (Field field : Utils.getAllFieldsFromEntity(data)) {
+                field.setAccessible(true);
+                columns.add(field.getName());
+                values.add(field.get(data));
+                field.setAccessible(false);
+            }
+            return this;
+        }
+
+        public Insert values(List<KeyValuePair<String, Object>> data) throws OlivaDevelopException {
+            if (Utils.isNull(from)) {
+                throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
+            }
+            columns = new ArrayList<>();
+            values = new ArrayList<>();
+            for (KeyValuePair<String, Object> kv : data) {
+                columns.add(kv.getKey());
+                values.add(kv.getValue());
+            }
+            return this;
+        }
+
+        public <T extends BasicEntity> Insert from(Class<T> opa) throws OlivaDevelopException {
+            try {
+                if (Utils.isNotNull(opa)) {
+                    Entity entity = opa.getAnnotation(Entity.class);
+                    if (Utils.isNotNull(entity)) {
+                        this.from = entity.table();
+                    } else {
+                        throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
+                    }
+                } else {
+                    throw new OlivaDevelopException(PERSISTENCE, "La clase no existe");
+                }
+            } catch (Exception e) {
+                throw new OlivaDevelopException(PERSISTENCE, e.getMessage());
+            }
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            List<String> vals = new ArrayList<>();
+            for (Object val : this.values) {
+                if (Utils.isNumeric(val)) {
+                    vals.add(String.valueOf(val));
+                } else if (Utils.isBoolean(val)) {
+                    vals.add(Utils.parseBoolean(val));
+                } else {
+                    vals.add("\"" + String.valueOf(val) + "\"");
+                }
+            }
+            StringBuilder insert = new StringBuilder();
+            insert.append("INSERT INTO ");
+            insert.append(this.from);
+            insert.append(" (");
+            insert.append(String.join(",", this.columns));
+            insert.append(") VALUES (");
+            insert.append(String.join(",", vals));
+            insert.append(");");
+            return insert.toString();
+        }
     }
 
     public static class Update {

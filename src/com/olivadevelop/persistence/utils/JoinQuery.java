@@ -1,7 +1,6 @@
 package com.olivadevelop.persistence.utils;
 
 import com.olivadevelop.persistence.annotations.Entity;
-import com.olivadevelop.persistence.annotations.Id;
 
 import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
 
@@ -12,8 +11,8 @@ import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeExcep
  */
 class JoinQuery<T, E> {
 
-    private T entity;
-    private E entityJoin;
+    private Class<T> entity;
+    private Class<E> entityJoin;
     private String table;
     private String tableJoin;
     private String alias;
@@ -24,16 +23,20 @@ class JoinQuery<T, E> {
     public JoinQuery() {
     }
 
-    public JoinQuery(T entity, E entityJoin) throws OlivaDevelopException, IllegalAccessException {
+    public JoinQuery(Class<T> entity, Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException {
         setEntity(entity);
         setEntityJoin(entityJoin);
     }
 
-    public T getEntity() {
+    public Class<E> getEntityJoin() {
+        return entityJoin;
+    }
+
+    public Class<T> getEntity() {
         return entity;
     }
 
-    public void setEntity(T entity) throws OlivaDevelopException, IllegalAccessException {
+    public void setEntity(Class<T> entity) throws OlivaDevelopException, IllegalAccessException {
         Entity entityAn = entity.getClass().getAnnotation(Entity.class);
         if (Utils.isNotNull(entityAn)) {
             this.entity = entity;
@@ -45,11 +48,7 @@ class JoinQuery<T, E> {
         }
     }
 
-    public E getEntityJoin() {
-        return entityJoin;
-    }
-
-    public void setEntityJoin(E entityJoin) throws OlivaDevelopException, IllegalAccessException {
+    public void setEntityJoin(Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException {
         Entity entityAn = entityJoin.getClass().getAnnotation(Entity.class);
         if (Utils.isNotNull(entityAn)) {
             this.entityJoin = entityJoin;

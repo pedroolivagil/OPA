@@ -41,11 +41,11 @@ public final class ServiceDAO implements EntityManager {
             QueryBuilder.Query query = new QueryBuilder.Query();
             KeyValuePair<String, Object> field = Utils.getPkFromEntity(entity);
             query.find();
-            query.from(entity.newInstance());
+            query.from(entity);
             query.where(field.getKey() + " = " + id);
             query.orderBy(field.getKey(), QueryBuilder.Query.ORDER_BY.ASC);
             retorno = service.execute(query.toString());
-        } catch (OlivaDevelopException | IllegalAccessException | InstantiationException e) {
+        } catch (OlivaDevelopException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return jsonPersistence.getEntity(retorno);
