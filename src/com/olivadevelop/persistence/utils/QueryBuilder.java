@@ -13,6 +13,7 @@ import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeExcep
  * Copyright OlivaDevelop 2014-2018
  * Created by Oliva on 23/01/2018.
  */
+@SuppressWarnings("Duplicates")
 public abstract class QueryBuilder {
 
     public static class Query {
@@ -156,19 +157,6 @@ public abstract class QueryBuilder {
             return this;
         }
 
-        public Insert values(List<KeyValuePair<String, Object>> data) throws OlivaDevelopException {
-            if (Utils.isNull(from)) {
-                throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
-            }
-            columns = new ArrayList<>();
-            values = new ArrayList<>();
-            for (KeyValuePair<String, Object> kv : data) {
-                columns.add(kv.getKey());
-                values.add(kv.getValue());
-            }
-            return this;
-        }
-
         public <T extends BasicEntity> Insert from(Class<T> opa) throws OlivaDevelopException {
             try {
                 if (Utils.isNotNull(opa)) {
@@ -203,9 +191,9 @@ public abstract class QueryBuilder {
             insert.append("INSERT INTO ");
             insert.append(this.from);
             insert.append(" (");
-            insert.append(String.join(",", this.columns));
+            insert.append(String.join(", ", this.columns));
             insert.append(") VALUES (");
-            insert.append(String.join(",", vals));
+            insert.append(String.join(", ", vals));
             insert.append(");");
             return insert.toString();
         }
@@ -213,10 +201,152 @@ public abstract class QueryBuilder {
 
     public static class Update {
 
+        private String from;
+        private List<String> values;
+        private StringBuilder where;
+
+        public <T extends BasicEntity> Update values(T data) throws OlivaDevelopException, IllegalAccessException {
+            if (Utils.isNull(from)) {
+                throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
+            }
+            values = new ArrayList<>();
+            for (Field field : Utils.getAllFieldsFromEntity(data)) {
+                field.setAccessible(true);
+                Object val = field.get(data);
+                if (Utils.isNumeric(val)) {
+                    val = String.valueOf(val);
+                } else if (Utils.isBoolean(val)) {
+                    val = Utils.parseBoolean(val);
+                } else {
+                    val = "\"" + String.valueOf(val) + "\"";
+                }
+                values.add(field.getName() + " = " + val);
+                field.setAccessible(false);
+            }
+            return this;
+        }
+
+        public <T extends BasicEntity> Update from(Class<T> opa) throws OlivaDevelopException {
+            try {
+                if (Utils.isNotNull(opa)) {
+                    Entity entity = opa.getAnnotation(Entity.class);
+                    if (Utils.isNotNull(entity)) {
+                        this.from = entity.table();
+                    } else {
+                        throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
+                    }
+                } else {
+                    throw new OlivaDevelopException(PERSISTENCE, "La clase no existe");
+                }
+            } catch (Exception e) {
+                throw new OlivaDevelopException(PERSISTENCE, e.getMessage());
+            }
+            return this;
+        }
+
+        public Update where(String condition) throws OlivaDevelopException {
+            if (Utils.isNotNull(condition)) {
+                this.where = new StringBuilder();
+                this.where.append(" WHERE ");
+                this.where.append(condition);
+            }
+            return this;
+        }
+
+        public Update and(String condition) throws OlivaDevelopException {
+            if (Utils.isNull(where)) {
+                throw new OlivaDevelopException(PERSISTENCE, "WHERE debe ser definido préviamente.");
+            }
+            this.where.append(" AND ");
+            this.where.append(condition);
+            return this;
+        }
+
+        public Update or(String condition) throws OlivaDevelopException {
+            if (Utils.isNull(where)) {
+                throw new OlivaDevelopException(PERSISTENCE, "WHERE debe ser definido préviamente.");
+            }
+            this.where.append(" OR ");
+            this.where.append(condition);
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder update = new StringBuilder();
+            update.append("UPDATE ");
+            update.append(this.from);
+            update.append(" SET ");
+            update.append(String.join(", ", this.values));
+            if (Utils.isNotNull(this.where)) {
+                update.append(this.where);
+            }
+            update.append(";");
+            return update.toString();
+        }
     }
 
     public static class Delete {
 
+        private String from;
+        private StringBuilder where;
+
+        public <T extends BasicEntity> Delete from(Class<T> opa) throws OlivaDevelopException {
+            try {
+                if (Utils.isNotNull(opa)) {
+                    Entity entity = opa.getAnnotation(Entity.class);
+                    if (Utils.isNotNull(entity)) {
+                        this.from = entity.table();
+                    } else {
+                        throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
+                    }
+                } else {
+                    throw new OlivaDevelopException(PERSISTENCE, "La clase no existe");
+                }
+            } catch (Exception e) {
+                throw new OlivaDevelopException(PERSISTENCE, e.getMessage());
+            }
+            return this;
+        }
+
+        public Delete where(String condition) throws OlivaDevelopException {
+            if (Utils.isNotNull(condition)) {
+                this.where = new StringBuilder();
+                this.where.append(" WHERE ");
+                this.where.append(condition);
+            }
+            return this;
+        }
+
+        public Delete and(String condition) throws OlivaDevelopException {
+            if (Utils.isNull(where)) {
+                throw new OlivaDevelopException(PERSISTENCE, "WHERE debe ser definido préviamente.");
+            }
+            this.where.append(" AND ");
+            this.where.append(condition);
+            return this;
+        }
+
+        public Delete or(String condition) throws OlivaDevelopException {
+            if (Utils.isNull(where)) {
+                throw new OlivaDevelopException(PERSISTENCE, "WHERE debe ser definido préviamente.");
+            }
+            this.where.append(" OR ");
+            this.where.append(condition);
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder update = new StringBuilder();
+            update.append("DELETE FROM ");
+            update.append(this.from);
+            if (Utils.isNotNull(this.where)) {
+                update.append(this.where);
+            }
+            update.append(";");
+            return update.toString();
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package test;
 
+import com.olivadevelop.persistence.utils.Logger;
 import com.olivadevelop.persistence.utils.OlivaDevelopException;
 import com.olivadevelop.persistence.utils.QueryBuilder;
 
@@ -18,40 +19,78 @@ public class MainTest {
         tester.testQuery(testEntity);
         tester.testComplexQuery(testEntity);
         tester.testInsert(testEntity);
+        tester.testUpdate(testEntity);
+        tester.testComplexUpdate(testEntity);
+        tester.testDelete(testEntity);
     }
 }
 
 class Test {
+    Logger<Test> logger = new Logger<>(Test.class);
+
     void testQuery(TestEntity entity) {
-        System.out.println(".testQuery() is IN");
+        logger.print(".testQuery() is IN");
         QueryBuilder.Query qb = new QueryBuilder.Query();
         try {
             qb.from(TestEntity.class).find();
         } catch (OlivaDevelopException e) {
             e.printStackTrace();
         }
-        System.out.println(qb.toString());
+        logger.print(qb.toString());
     }
 
     void testComplexQuery(TestEntity entity) {
-        System.out.println(".testComplexQuery() is IN");
+        logger.print(".testComplexQuery() is IN");
         QueryBuilder.Query qb = new QueryBuilder.Query();
         try {
-            qb.from(TestEntity.class).find().where("id = 23").and("name LIKE 'Pedro'").distinct();
+            qb.from(TestEntity.class).find().where("id = 23").and("name LIKE 'Pedro'").or("besugo = false").distinct();
         } catch (OlivaDevelopException e) {
             e.printStackTrace();
         }
-        System.out.println(qb.toString());
+        logger.print(qb.toString());
     }
 
     void testInsert(TestEntity entity) {
-        System.out.println(".testInsert() is IN");
+        logger.print(".testInsert() is IN");
         QueryBuilder.Insert qb = new QueryBuilder.Insert();
         try {
             qb.from(TestEntity.class).values(entity);
         } catch (OlivaDevelopException | IllegalAccessException e) {
             e.printStackTrace();
         }
-        System.out.println(qb.toString());
+        logger.print(qb.toString());
+    }
+
+    void testUpdate(TestEntity entity) {
+        logger.print(".testUpdate() is IN");
+        QueryBuilder.Update qb = new QueryBuilder.Update();
+        try {
+            qb.from(TestEntity.class).values(entity);
+        } catch (OlivaDevelopException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        logger.print(qb.toString());
+    }
+
+    void testComplexUpdate(TestEntity entity) {
+        logger.print(".testUpdate() is IN");
+        QueryBuilder.Update qb = new QueryBuilder.Update();
+        try {
+            qb.from(TestEntity.class).values(entity).where("id = 1").and("lol = 'xD'");
+        } catch (OlivaDevelopException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        logger.print(qb.toString());
+    }
+
+    void testDelete(TestEntity entity) {
+        logger.print(".testDelete() is IN");
+        QueryBuilder.Delete qb = new QueryBuilder.Delete();
+        try {
+            qb.from(TestEntity.class).where("id = 1").and("lol = 'xD'");
+        } catch (OlivaDevelopException e) {
+            e.printStackTrace();
+        }
+        logger.print(qb.toString());
     }
 }
