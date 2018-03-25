@@ -38,6 +38,7 @@ class JoinQuery<T, E> {
         if (Utils.isNotNull(entityAn)) {
             this.entity = entity;
             this.table = entityAn.table();
+            this.alias = entityAn.table();
             this.id = Utils.getPkFromEntity(entity);
         } else {
             throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
@@ -53,6 +54,7 @@ class JoinQuery<T, E> {
         if (Utils.isNotNull(entityAn)) {
             this.entityJoin = entityJoin;
             this.tableJoin = entityAn.table();
+            this.aliasJoin = entityAn.table();
             this.idJoin = Utils.getPkFromEntity(entityJoin);
         } else {
             throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");

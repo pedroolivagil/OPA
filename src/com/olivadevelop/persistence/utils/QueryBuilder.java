@@ -51,18 +51,11 @@ public abstract class QueryBuilder {
         }
 
         public <T extends BasicEntity> Query from(T opa) throws OlivaDevelopException {
-            return from(opa, null);
-        }
-
-        public <T extends BasicEntity> Query from(T opa, String alias) throws OlivaDevelopException {
             try {
                 if (Utils.isNotNull(opa)) {
                     Entity entity = opa.getClass().getAnnotation(Entity.class);
                     if (Utils.isNotNull(entity)) {
-                        if (Utils.isNull(alias)) {
-                            alias = entity.table();
-                        }
-                        this.from = entity.table() + " " + alias;
+                        this.from = entity.table() + " " + entity.table();
                     } else {
                         throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
                     }
