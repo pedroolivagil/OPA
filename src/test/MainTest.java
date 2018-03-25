@@ -1,8 +1,6 @@
 package test;
 
-import com.olivadevelop.persistence.utils.Logger;
-import com.olivadevelop.persistence.utils.OlivaDevelopException;
-import com.olivadevelop.persistence.utils.QueryBuilder;
+import com.olivadevelop.persistence.utils.*;
 
 public class MainTest {
 
@@ -76,7 +74,10 @@ class Test {
         logger.print(".testUpdate() is IN");
         QueryBuilder.Update qb = new QueryBuilder.Update();
         try {
-            qb.from(TestEntity.class).values(entity).where("id = 1").and("lol = 'xD'");
+            KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity);
+            qb.from(entity.getClass());
+            qb.values(entity);
+            qb.where(pk.getKey().concat(" = ").concat(pk.getValueAsString()));
         } catch (OlivaDevelopException | IllegalAccessException e) {
             e.printStackTrace();
         }
