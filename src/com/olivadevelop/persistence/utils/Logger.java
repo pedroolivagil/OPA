@@ -9,7 +9,7 @@ public class Logger<T> {
     }
 
     public void print(String text) {
-        System.out.print(clase.getSimpleName());
+        System.out.print(clase.getName());
         System.out.print(": ");
         System.out.print(text);
         System.out.println();

@@ -51,10 +51,12 @@ public class Utils {
     public static <T> KeyValuePair<String, Object> getPkFromEntity(T entity) throws IllegalAccessException {
         KeyValuePair<String, Object> retorno = null;
         for (Field field : getAllFieldsFromEntity(entity)) {
+            field.setAccessible(true);
             Id pk = field.getAnnotation(Id.class);
             if (Utils.isNotNull(pk)) {
                 retorno = new KeyValuePair<>(field.getName(), field.get(entity));
             }
+            field.setAccessible(false);
         }
         return retorno;
     }

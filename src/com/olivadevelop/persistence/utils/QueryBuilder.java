@@ -1,6 +1,7 @@
 package com.olivadevelop.persistence.utils;
 
 import com.olivadevelop.persistence.annotations.Entity;
+import com.olivadevelop.persistence.annotations.Id;
 import com.olivadevelop.persistence.entities.BasicEntity;
 
 import java.lang.reflect.Field;
@@ -212,15 +213,17 @@ public abstract class QueryBuilder {
             values = new ArrayList<>();
             for (Field field : Utils.getAllFieldsFromEntity(data)) {
                 field.setAccessible(true);
-                Object val = field.get(data);
-                if (Utils.isNumeric(val)) {
-                    val = String.valueOf(val);
-                } else if (Utils.isBoolean(val)) {
-                    val = Utils.parseBoolean(val);
-                } else {
-                    val = "\"" + String.valueOf(val) + "\"";
+                if (field.getAnnotation(Id.class) == null) {
+                    Object val = field.get(data);
+                    if (Utils.isNumeric(val)) {
+                        val = String.valueOf(val);
+                    } else if (Utils.isBoolean(val)) {
+                        val = Utils.parseBoolean(val);
+                    } else {
+                        val = "\"" + String.valueOf(val) + "\"";
+                    }
+                    values.add(field.getName() + " = " + val);
                 }
-                values.add(field.getName() + " = " + val);
                 field.setAccessible(false);
             }
             return this;
