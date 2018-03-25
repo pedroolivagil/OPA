@@ -5,7 +5,6 @@ import com.olivadevelop.persistence.interfaces.EntityManager;
 import com.olivadevelop.persistence.utils.*;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

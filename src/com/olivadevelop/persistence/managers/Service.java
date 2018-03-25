@@ -1,8 +1,8 @@
 package com.olivadevelop.persistence.managers;
 
 import com.olivadevelop.persistence.entities.BasicEntity;
-import com.olivadevelop.persistence.utils.KeyValuePair;
-import com.olivadevelop.persistence.utils.Utils;
+import com.olivadevelop.persistence.interfaces.EntityManager;
+import com.olivadevelop.persistence.utils.*;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ final class Service {
         PERSIST, MERGE, REMOVE
     }
 
+    Logger<Service> logger = new Logger<>(Service.class);
     private List<KeyValuePair<BasicEntity, MODE>> entities = new ArrayList<>();
 
     /**
@@ -41,12 +42,34 @@ final class Service {
     }
 
     /**
-     * Ejecuta las transacciones de Persist, merge y remove
+     * Ejecuta las transacciones de Persist, merge y remove. Debe ser el servidor el que gestione las
      */
     void execute() {
-
-        // Después de ejecutar las transacciones, limpiamos la lista de entidades
-        entities.clear();
+        try {
+            List<String> persistQueries = new ArrayList<>();
+            List<String> mergeQueries = new ArrayList<>();
+            List<String> removeQueries = new ArrayList<>();
+            for (KeyValuePair<BasicEntity, MODE> entity : entities) {
+                switch (entity.getValue()) {
+                    case MERGE:
+                        KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity.getKey());
+                        QueryBuilder.Update update = new QueryBuilder.Update();
+                        update.from(entity.getKey().getClass());
+                        update.values(entity.getKey());
+                        update.where(pk.getKey().concat(" = ").concat(pk.getValueAsString()));
+                        mergeQueries.add(update.toString());
+                        break;
+                    case REMOVE:
+                        break;
+                    case PERSIST:
+                        break;
+                }
+            }
+            // Después de ejecutar las transacciones, limpiamos la lista de entidades
+            entities.clear();
+        } catch (OlivaDevelopException | IllegalAccessException e) {
+            logger.error(e);
+        }
     }
 
     <T extends BasicEntity> void add(T entity, MODE mode) {

@@ -338,14 +338,14 @@ public abstract class QueryBuilder {
 
         @Override
         public String toString() {
-            StringBuilder update = new StringBuilder();
-            update.append("DELETE FROM ");
-            update.append(this.from);
+            StringBuilder delete = new StringBuilder();
+            delete.append("DELETE FROM ");
+            delete.append(this.from);
             if (Utils.isNotNull(this.where)) {
-                update.append(this.where);
+                delete.append(this.where);
             }
-            update.append(";");
-            return update.toString();
+            delete.append(";");
+            return delete.toString();
         }
     }
 
