@@ -12,7 +12,7 @@ import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeExcep
  * Created by Oliva on 23/01/2018.
  */
 public abstract class QueryBuilder {
-    
+
     public static class Query {
 
         public enum ORDER_BY {
@@ -46,7 +46,7 @@ public abstract class QueryBuilder {
             if (Utils.isNull(from)) {
                 throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
             }
-            this.fields = "COUNT(" + column + ")";
+            this.fields = " COUNT(" + column + ")";
             return this;
         }
 
@@ -111,7 +111,7 @@ public abstract class QueryBuilder {
         }
 
         public Query orderBy(String orderByColumn, ORDER_BY order) throws OlivaDevelopException {
-            this.orderBy = "ORDER BY " + orderByColumn + " " + order.name();
+            this.orderBy = " ORDER BY " + orderByColumn + " " + order.name();
             return this;
         }
 
