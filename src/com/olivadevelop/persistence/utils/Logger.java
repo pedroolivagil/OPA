@@ -16,7 +16,10 @@ public class Logger<T> {
     }
 
     public void error(Exception e) {
-        print(e.getMessage());
+        System.err.print(clase.getName());
+        System.err.print(": ");
+        System.err.print(e.getMessage());
+        System.err.println();
         e.printStackTrace();
     }
 }

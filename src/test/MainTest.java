@@ -14,12 +14,15 @@ public class MainTest {
         testEntity.setPrecio(20.54);
 
         // lanzamos los testers
-        tester.testQuery(testEntity);
+        /*tester.testQuery(testEntity);
         tester.testComplexQuery(testEntity);
         tester.testInsert(testEntity);
         tester.testUpdate(testEntity);
         tester.testComplexUpdate(testEntity);
-        tester.testDelete(testEntity);
+        tester.testDelete(testEntity);*/
+        TestController controller = new TestController();
+        controller.create(testEntity);
+
     }
 }
 

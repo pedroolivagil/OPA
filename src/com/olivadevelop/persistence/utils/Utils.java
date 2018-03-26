@@ -3,14 +3,13 @@ package com.olivadevelop.persistence.utils;
 import com.olivadevelop.persistence.annotations.Entity;
 import com.olivadevelop.persistence.annotations.Id;
 import com.olivadevelop.persistence.entities.BasicEntity;
+import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.*;
 
 /**
  * Copyright OlivaDevelop 2014-2018
@@ -20,6 +19,10 @@ public class Utils {
 
     public static boolean isNull(Object object) {
         return object == null || (object instanceof String && object.toString().trim().equals(""));
+    }
+
+    public static boolean isNull(JSONObject object) {
+        return object == null || (object.toString().trim().equals("{}"));
     }
 
     public static boolean isNotNull(Object obj) {

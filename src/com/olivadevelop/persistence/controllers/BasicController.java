@@ -7,6 +7,7 @@ import com.olivadevelop.persistence.interfaces.EntityManager;
 import com.olivadevelop.persistence.managers.ServiceDAO;
 import com.olivadevelop.persistence.utils.OlivaDevelopException;
 import com.olivadevelop.persistence.utils.QueryBuilder;
+import com.olivadevelop.persistence.utils.Utils;
 
 import java.util.List;
 
@@ -52,7 +53,9 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
 
     @Override
     public boolean create(T entity) {
-        return false;
+        T result = getEm().persist(entity);
+        getEm().flush();
+        return Utils.isNotNull(result);
     }
 
     @Override

@@ -29,7 +29,8 @@ final class Service {
     }
 
     Logger<Service> logger = new Logger<>(Service.class);
-    private List<KeyValuePair<BasicEntity, MODE>> entities = new ArrayList<>();
+    List<KeyValuePair<BasicEntity, MODE>> entities = new ArrayList<>();
+    RestService restService = new RestService();
 
     /**
      * Recive un string con la query y devuelve un JSON con los resultados.
@@ -46,25 +47,32 @@ final class Service {
      */
     void execute() {
         try {
-            List<String> persistQueries = new ArrayList<>();
-            List<String> mergeQueries = new ArrayList<>();
-            List<String> removeQueries = new ArrayList<>();
+            List<String> queries = new ArrayList<>();
             for (KeyValuePair<BasicEntity, MODE> entity : entities) {
+                KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity.getKey());
                 switch (entity.getValue()) {
                     case MERGE:
-                        KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity.getKey());
                         QueryBuilder.Update update = new QueryBuilder.Update();
                         update.from(entity.getKey().getClass());
                         update.values(entity.getKey());
                         update.where(pk.getKey().concat(" = ").concat(pk.getValueAsString()));
-                        mergeQueries.add(update.toString());
+                        queries.add(update.toString());
                         break;
                     case REMOVE:
+                        QueryBuilder.Delete remove = new QueryBuilder.Delete();
+                        remove.from(entity.getKey().getClass());
+                        remove.where(pk.getKey().concat(" = ").concat(pk.getValueAsString()));
+                        queries.add(remove.toString());
                         break;
                     case PERSIST:
+                        QueryBuilder.Insert persist = new QueryBuilder.Insert();
+                        persist.from(entity.getKey().getClass());
+                        persist.values(entity.getKey());
+                        queries.add(persist.toString());
                         break;
                 }
             }
+            restService.run(queries);
             // Después de ejecutar las transacciones, limpiamos la lista de entidades
             entities.clear();
         } catch (OlivaDevelopException | IllegalAccessException e) {
