@@ -21,6 +21,19 @@ import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeExcep
 public class JSONPersistence<T extends BasicEntity> {
     private static final String ENTITY = "entity";
 
+    public enum REQUEST {
+        CODE_200(200), CODE_404(404);
+        int code;
+
+        REQUEST(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+    }
+
     private Class<T> entityClass;
 
     //TODO: para el test lo dejamos publico
@@ -211,8 +224,13 @@ public class JSONPersistence<T extends BasicEntity> {
     private T parseJsonToEntity(JSONObject json, Class<T> entity) throws JSONException {
         T retorno = null;
         if (Utils.isNotNull(json)) {
-            JSONArray array = json.getJSONArray(entity.getSimpleName());
-            retorno = constructObject(array, entity, 0);
+            int code = json.getInt("result");
+            if (REQUEST.CODE_200.getCode() == code) {
+                JSONArray array = json.getJSONArray("entities");
+                if (Utils.isNotNull(array)) {
+                    retorno = constructObject(array, entity, 0);
+                }
+            }
         }
         return retorno;
     }
@@ -239,10 +257,13 @@ public class JSONPersistence<T extends BasicEntity> {
     private List<T> parseJsonToListEntity(JSONObject json, Class<T> entity) throws JSONException {
         List<T> retorno = new ArrayList<>();
         if (Utils.isNotNull(json)) {
-            JSONArray array = json.getJSONArray(entity.getSimpleName());
-            if (Utils.isNotNull(array)) {
-                for (int x = 0; x < array.length(); x++) {
-                    retorno.add(constructObject(array, entity, x));
+            int code = json.getInt("result");
+            if (REQUEST.CODE_200.getCode() == code) {
+                JSONArray array = json.getJSONArray("entities");
+                if (Utils.isNotNull(array)) {
+                    for (int x = 0; x < array.length(); x++) {
+                        retorno.add(constructObject(array, entity, x));
+                    }
                 }
             }
         }
