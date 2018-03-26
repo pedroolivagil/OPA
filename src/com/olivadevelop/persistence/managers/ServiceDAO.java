@@ -21,17 +21,18 @@ public final class ServiceDAO implements EntityManager {
         this.service = new Service();
     }
 
+
     @Override
-    public <T extends BasicEntity> T query(Class<T> entity, String query) {
-        JSONObject retorno = service.execute(query);
+    public <T extends BasicEntity> T singleQuery(String query, Class<T> entity) {
         JSONPersistence<T> jsonPersistence = new JSONPersistence<>(entity);
+        JSONObject retorno = service.execute(query);
         return jsonPersistence.getEntity(retorno);
     }
 
     @Override
-    public <T extends BasicEntity> List<T> query(String query, Class<T> entity) {
-        JSONObject retorno = service.execute(query);
+    public <T extends BasicEntity> List<T> createQuery(String query, Class<T> entity) {
         JSONPersistence<T> jsonPersistence = new JSONPersistence<>(entity);
+        JSONObject retorno = service.execute(query);
         return jsonPersistence.getListEntities(retorno);
     }
 
