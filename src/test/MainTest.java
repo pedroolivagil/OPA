@@ -3,6 +3,7 @@ package test;
 import com.olivadevelop.persistence.utils.*;
 
 public class MainTest {
+    static Logger<Test> logger = new Logger<>(Test.class);
 
     public static void main(String args[]) {
         Test tester = new Test();
@@ -21,7 +22,7 @@ public class MainTest {
         tester.testComplexUpdate(testEntity);
         tester.testDelete(testEntity);*/
         TestController controller = new TestController();
-        controller.create(testEntity);
+        logger.print("bool: " + controller.create(testEntity));
 
     }
 }
