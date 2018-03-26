@@ -15,17 +15,15 @@ public interface ControllerMethods<T extends BasicEntity> {
 
     T read(Integer idEntity);
 
-    T read(T entity);
-
     T read(QueryBuilder queryBuilder);
 
     List<T> readAll(QueryBuilder queryBuilder);
 
     List<T> readAll();
 
-    boolean create(T entity);
+    void create(T entity);
 
-    boolean update(T entity);
+    T update(T entity);
 
-    boolean delete(T entity);
+    void delete(T entity);
 }

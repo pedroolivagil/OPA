@@ -32,11 +32,6 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
     }
 
     @Override
-    public T read(T entity) {
-        return null;
-    }
-
-    @Override
     public T read(QueryBuilder queryBuilder) {
         return null;
     }
@@ -52,23 +47,37 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
     }
 
     @Override
-    public boolean create(T entity) {
-        T result = getEm().persist(entity);
-        getEm().flush();
-        return Utils.isNotNull(result);
+    public void create(T entity) {
+        preCreate(entity);
+        em.persist(entity);
+        em.flush();
     }
 
     @Override
-    public boolean update(T entity) {
-        return false;
+    public T update(T entity) {
+        preUpdate(entity);
+        entity = em.merge(entity);
+        em.flush();
+        return entity;
     }
 
     @Override
-    public boolean delete(T entity) {
-        return false;
+    public void delete(T entity) {
+        preDelete(entity);
+        em.remove(entity);
+        em.flush();
     }
 
-    public EntityManager getEm() {
-        return em;
+    public void preCreate(T entity) {
+
     }
+
+    public void preUpdate(T entity) {
+
+    }
+
+    public void preDelete(T entity) {
+
+    }
+
 }

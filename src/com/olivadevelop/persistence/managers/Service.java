@@ -1,7 +1,6 @@
 package com.olivadevelop.persistence.managers;
 
 import com.olivadevelop.persistence.entities.BasicEntity;
-import com.olivadevelop.persistence.interfaces.EntityManager;
 import com.olivadevelop.persistence.utils.*;
 import org.json.JSONObject;
 
@@ -39,7 +38,7 @@ final class Service {
      * @return
      */
     JSONObject execute(String query) {
-        return null;
+        return restService.run(query);
     }
 
     /**

@@ -11,11 +11,33 @@ import java.util.List;
 
 import static com.olivadevelop.persistence.utils.Constant.TIMEOUT;
 
-class RestService {
+final class RestService {
     Logger<Service> logger = new Logger<>(Service.class);
-    JSONObject retorno = new JSONObject();
+    JSONObject retorno;
 
+
+    private enum PATH {
+        EXECUTE("db_manager.php"),
+        FIND("read.php");
+
+        String v;
+
+        PATH(String v) {
+            this.v = v;
+        }
+
+        public String v() {
+            return v;
+        }
+    }
+
+    /**
+     * Queries pueden ser, INSERT, DELETE, UPDATE
+     *
+     * @param queries
+     */
     void run(final List<String> queries) {
+        retorno = new JSONObject();
         Thread thread = new Thread(() -> {
             synchronized (retorno) {
                 try {
@@ -23,7 +45,7 @@ class RestService {
                     for (String query : queries) {
                         formbody.add("query[]", query);
                     }
-                    URL url = new URL(Constant.SERVICE_URL + "db_manager.php");
+                    URL url = new URL(Constant.SERVICE_URL + PATH.EXECUTE.v());
                     OkHttpClient client = new OkHttpClient();
                     Request request = new Request.Builder()
                             .url(url)
@@ -38,7 +60,6 @@ class RestService {
                     }
                     response.close();
                 } catch (Exception e) {
-                    /*logger.error(e);*/
                 }
             }
         });
@@ -47,20 +68,57 @@ class RestService {
         onPostExecute();
     }
 
+    /**
+     * Para las consultas SELECT
+     *
+     * @param query
+     * @return
+     */
+    JSONObject run(final String query) {
+        retorno = new JSONObject();
+        Thread thread = new Thread(() -> {
+            synchronized (retorno) {
+                try {
+                    FormBody.Builder formbody = new FormBody.Builder();
+                    formbody.add("query", query);
+                    URL url = new URL(Constant.SERVICE_URL + PATH.FIND.v());
+                    OkHttpClient client = new OkHttpClient();
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .post(formbody.build())
+                            .build();
+                    Response response = client.newCall(request).execute();
+                    ResponseBody body = response.body();
+                    if (Utils.isNotNull(body)) {
+                        String result = body.string();
+                        retorno = new JSONObject(result);
+                        retorno.notifyAll();
+                    }
+                    response.close();
+                } catch (Exception e) {
+                }
+            }
+        });
+        thread.start();
+        onPreExecute();
+        return onPostExecute();
+    }
+
     void onPreExecute() {
         logger.print("Receiving data from service...");
     }
 
-    void onPostExecute() {
+    JSONObject onPostExecute() {
         try {
             synchronized (retorno) {
                 if (Utils.isNull(retorno)) {
                     retorno.wait(TIMEOUT);
                 }
-                logger.print(retorno.toString());
+                //logger.print(retorno.toString());
             }
         } catch (InterruptedException e) {
-            /*logger.error(e);*/
+        } finally {
+            return retorno;
         }
     }
 }
