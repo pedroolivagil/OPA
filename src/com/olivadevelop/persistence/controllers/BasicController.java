@@ -27,7 +27,7 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
     }
 
     @Override
-    public T read(Integer idEntity) {
+    public T read(Integer idEntity) throws OlivaDevelopException {
         return em.find(entityClass, idEntity);
     }
 
@@ -47,14 +47,14 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
     }
 
     @Override
-    public void create(T entity) {
+    public void create(T entity) throws OlivaDevelopException {
         preCreate(entity);
         em.persist(entity);
         em.flush();
     }
 
     @Override
-    public T update(T entity) {
+    public T update(T entity) throws OlivaDevelopException {
         preUpdate(entity);
         entity = em.merge(entity);
         em.flush();
@@ -62,7 +62,7 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
     }
 
     @Override
-    public void delete(T entity) {
+    public void delete(T entity) throws OlivaDevelopException {
         preDelete(entity);
         em.remove(entity);
         em.flush();

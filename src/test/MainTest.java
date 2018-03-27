@@ -22,8 +22,11 @@ public class MainTest {
         tester.testComplexUpdate(testEntity);
         tester.testDelete(testEntity);*/
         TestController controller = new TestController();
-        logger.print("bool: " + controller.create(testEntity));
-
+        try {
+            controller.create(testEntity);
+        } catch (OlivaDevelopException e) {
+            logger.error(e);
+        }
     }
 }
 

@@ -79,7 +79,20 @@ final class Service {
         }
     }
 
-    <T extends BasicEntity> void add(T entity, MODE mode) {
+    <T extends BasicEntity> void add(T entity, MODE mode) throws OlivaDevelopException {
+        if (MODE.PERSIST.equals(mode)) {
+            entity = nextVal(entity);
+        }
         entities.add(new KeyValuePair<>(entity, mode));
+    }
+
+    private <T extends BasicEntity> T nextVal(T entity) throws OlivaDevelopException {
+        /*SELECT nextval('$nameSequence') as sequence;*/
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT nextval('");
+        query.append(Utils.getTableNameFromEntity(entity));
+        query.append("') as sequence;");
+        JSONObject id = restService.run(query.toString());
+        return null;
     }
 }

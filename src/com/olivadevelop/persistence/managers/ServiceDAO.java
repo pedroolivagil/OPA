@@ -13,14 +13,13 @@ import java.util.List;
  */
 public final class ServiceDAO implements EntityManager {
 
-    Logger<EntityManager> logger = new Logger<>(EntityManager.class);
+    private Logger<EntityManager> logger = new Logger<>(EntityManager.class);
 
     private Service service;
 
     public ServiceDAO() {
         this.service = new Service();
     }
-
 
     @Override
     public <T extends BasicEntity> T singleQuery(String query, Class<T> entity) {
@@ -42,32 +41,32 @@ public final class ServiceDAO implements EntityManager {
         JSONPersistence<T> jsonPersistence = new JSONPersistence<>(entity);
         try {
             QueryBuilder.Query query = new QueryBuilder.Query();
-            KeyValuePair<String, Object> field = Utils.getPkFromEntity(entity);
+            KeyValuePair<String, Object> field = Utils.getPkFromEntity(entity.newInstance());
             query.find();
             query.from(entity);
             query.where(field.getKey() + " = " + id);
             query.orderBy(field.getKey(), QueryBuilder.Query.ORDER_BY.ASC);
             retorno = service.execute(query.toString());
-        } catch (OlivaDevelopException | IllegalAccessException e) {
+        } catch (IllegalAccessException | InstantiationException | OlivaDevelopException e) {
             logger.error(e);
         }
         return jsonPersistence.getEntity(retorno);
     }
 
     @Override
-    public <T extends BasicEntity> T persist(T entity) {
+    public <T extends BasicEntity> T persist(T entity) throws OlivaDevelopException {
         service.add(entity, Service.MODE.PERSIST);
         return entity;
     }
 
     @Override
-    public <T extends BasicEntity> T merge(T entity) {
+    public <T extends BasicEntity> T merge(T entity) throws OlivaDevelopException {
         service.add(entity, Service.MODE.MERGE);
         return entity;
     }
 
     @Override
-    public <T extends BasicEntity> T remove(T entity) {
+    public <T extends BasicEntity> T remove(T entity) throws OlivaDevelopException {
         service.add(entity, Service.MODE.REMOVE);
         return entity;
     }

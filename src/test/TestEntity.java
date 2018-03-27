@@ -4,7 +4,7 @@ import com.olivadevelop.persistence.annotations.Entity;
 import com.olivadevelop.persistence.annotations.Id;
 import com.olivadevelop.persistence.entities.BasicEntity;
 
-@Entity(table = "locale")
+@Entity(table = "test")
 public class TestEntity extends BasicEntity {
 
     @Id

@@ -2,6 +2,7 @@ package com.olivadevelop.persistence.interfaces;
 
 
 import com.olivadevelop.persistence.entities.BasicEntity;
+import com.olivadevelop.persistence.utils.OlivaDevelopException;
 import com.olivadevelop.persistence.utils.QueryBuilder;
 
 import java.util.List;
@@ -13,17 +14,17 @@ import java.util.List;
 
 public interface ControllerMethods<T extends BasicEntity> {
 
-    T read(Integer idEntity);
+    T read(Integer idEntity) throws OlivaDevelopException;
 
-    T read(QueryBuilder queryBuilder);
+    T read(QueryBuilder queryBuilder) throws OlivaDevelopException;
 
-    List<T> readAll(QueryBuilder queryBuilder);
+    List<T> readAll(QueryBuilder queryBuilder) throws OlivaDevelopException;
 
-    List<T> readAll();
+    List<T> readAll() throws OlivaDevelopException;
 
-    void create(T entity);
+    void create(T entity) throws OlivaDevelopException;
 
-    T update(T entity);
+    T update(T entity) throws OlivaDevelopException;
 
-    void delete(T entity);
+    void delete(T entity) throws OlivaDevelopException;
 }

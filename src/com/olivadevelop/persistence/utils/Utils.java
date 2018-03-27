@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
+
 /**
  * Copyright OlivaDevelop 2014-2018
  * Created by Oliva on 22/02/2018.
@@ -33,8 +35,27 @@ public class Utils {
         return !isNull(obj) && !obj.isEmpty();
     }
 
+    public static boolean isNumeric(Object o) {
+        return o != null && String.valueOf(o).matches("[-+]?\\d*\\.?\\d+");
+    }
 
-    public static <T> List<Field> getAllFieldsFromEntity(T entity) {
+    public static boolean isBoolean(Object o) {
+        return o != null && (o.equals(true) || o.equals(false));
+    }
+
+    public static String parseBoolean(Object o) {
+        String retorno = null;
+        if (o != null) {
+            if (o.equals(true)) {
+                retorno = "1";
+            } else if (o.equals(false)) {
+                retorno = "0";
+            }
+        }
+        return retorno;
+    }
+
+    public static <T extends BasicEntity> List<Field> getAllFieldsFromEntity(T entity) {
         List<Field> fields = new ArrayList<>();
         fields.addAll(Arrays.asList(entity.getClass().getDeclaredFields()));
         Class<?> e = entity.getClass().getSuperclass();
@@ -51,7 +72,7 @@ public class Utils {
         return fields;
     }
 
-    public static <T> KeyValuePair<String, Object> getPkFromEntity(T entity) throws IllegalAccessException {
+    public static <T extends BasicEntity> KeyValuePair<String, Object> getPkFromEntity(T entity) throws IllegalAccessException {
         KeyValuePair<String, Object> retorno = null;
         for (Field field : getAllFieldsFromEntity(entity)) {
             field.setAccessible(true);
@@ -64,6 +85,17 @@ public class Utils {
         return retorno;
     }
 
+    public static <T extends BasicEntity> String getTableNameFromEntity(T entity) throws OlivaDevelopException {
+        String retorno = null;
+        Entity ent = entity.getClass().getAnnotation(Entity.class);
+        if (isNotNull(ent) && isNotNull(ent.table())) {
+            retorno = ent.table().trim();
+        } else {
+            throw new OlivaDevelopException(PERSISTENCE, "La entidad no tiene una tabla definida");
+        }
+        return retorno;
+    }
+
     /**
      * Devuelve true si el nombre o el valor de la propiedad coincide con los que queremos omitir
      *
@@ -72,7 +104,7 @@ public class Utils {
      * @return
      * @throws IllegalAccessException
      */
-    public static boolean ignoreField(Field field, BasicEntity entity) throws IllegalAccessException {
+    public static <T extends BasicEntity> boolean ignoreField(Field field, T entity) throws IllegalAccessException {
         boolean retorno = false;
         List<Boolean> list = new ArrayList<>();
         list.add(BasicEntity.CHANGE_FIELD.equals(field.getName()));
@@ -86,26 +118,6 @@ public class Utils {
             if (bool) {
                 retorno = true;
                 break;
-            }
-        }
-        return retorno;
-    }
-
-    public static boolean isNumeric(Object o) {
-        return o != null && String.valueOf(o).matches("[-+]?\\d*\\.?\\d+");
-    }
-
-    public static boolean isBoolean(Object o) {
-        return o != null && (o.equals(true) || o.equals(false));
-    }
-
-    public static String parseBoolean(Object o) {
-        String retorno = null;
-        if (o != null) {
-            if (o.equals(true)) {
-                retorno = "1";
-            } else if (o.equals(false)) {
-                retorno = "0";
             }
         }
         return retorno;

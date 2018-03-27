@@ -1,6 +1,7 @@
 package com.olivadevelop.persistence.utils;
 
 import com.olivadevelop.persistence.annotations.Entity;
+import com.olivadevelop.persistence.entities.BasicEntity;
 
 import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
 
@@ -9,7 +10,7 @@ import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeExcep
  * Created by Oliva on 23/03/2018.
  * RolerMaster
  */
-class JoinQuery<T, E> {
+class JoinQuery<T extends BasicEntity, E extends BasicEntity> {
 
     private Class<T> entity;
     private Class<E> entityJoin;
@@ -23,7 +24,7 @@ class JoinQuery<T, E> {
     public JoinQuery() {
     }
 
-    public JoinQuery(Class<T> entity, Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException {
+    public JoinQuery(Class<T> entity, Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException, InstantiationException {
         setEntity(entity);
         setEntityJoin(entityJoin);
     }
@@ -36,25 +37,25 @@ class JoinQuery<T, E> {
         return entity;
     }
 
-    public void setEntity(Class<T> entity) throws OlivaDevelopException, IllegalAccessException {
+    public void setEntity(Class<T> entity) throws OlivaDevelopException, IllegalAccessException, InstantiationException {
         Entity entityAn = entity.getClass().getAnnotation(Entity.class);
         if (Utils.isNotNull(entityAn)) {
             this.entity = entity;
             this.table = entityAn.table();
             this.alias = entityAn.table();
-            this.id = Utils.getPkFromEntity(entity);
+            this.id = Utils.getPkFromEntity(entity.newInstance());
         } else {
             throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
         }
     }
 
-    public void setEntityJoin(Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException {
+    public void setEntityJoin(Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException, InstantiationException {
         Entity entityAn = entityJoin.getClass().getAnnotation(Entity.class);
         if (Utils.isNotNull(entityAn)) {
             this.entityJoin = entityJoin;
             this.tableJoin = entityAn.table();
             this.aliasJoin = entityAn.table();
-            this.idJoin = Utils.getPkFromEntity(entityJoin);
+            this.idJoin = Utils.getPkFromEntity(entityJoin.newInstance());
         } else {
             throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
         }
