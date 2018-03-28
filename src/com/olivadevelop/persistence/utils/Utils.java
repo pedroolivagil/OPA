@@ -86,7 +86,7 @@ public class Utils {
     }
 
     public static <T extends BasicEntity> String getTableNameFromEntity(T entity) throws OlivaDevelopException {
-        String retorno = null;
+        String retorno;
         Entity ent = entity.getClass().getAnnotation(Entity.class);
         if (isNotNull(ent) && isNotNull(ent.table())) {
             retorno = ent.table().trim();
