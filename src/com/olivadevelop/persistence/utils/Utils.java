@@ -55,24 +55,28 @@ public class Utils {
         return retorno;
     }
 
-    public static <T extends BasicEntity> List<Field> getAllFieldsFromEntity(T entity) {
+    public static <T extends BasicEntity> List<Field> getAllFieldsFromEntity(T entity) throws OlivaDevelopException {
         List<Field> fields = new ArrayList<>();
-        fields.addAll(Arrays.asList(entity.getClass().getDeclaredFields()));
-        Class<?> e = entity.getClass().getSuperclass();
-        boolean next = true;
-        do {
-            Entity ent = e.getAnnotation(Entity.class);
-            if (isNotNull(ent)) {
-                fields.addAll(Arrays.asList(e.getDeclaredFields()));
-                e = e.getSuperclass();
-            } else {
-                next = false;
-            }
-        } while (next);
+        try {
+            fields.addAll(Arrays.asList(entity.getClass().getDeclaredFields()));
+            Class<?> e = entity.getClass().getSuperclass();
+            boolean next = true;
+            do {
+                Entity ent = e.getAnnotation(Entity.class);
+                if (isNotNull(ent)) {
+                    fields.addAll(Arrays.asList(e.getDeclaredFields()));
+                    e = e.getSuperclass();
+                } else {
+                    next = false;
+                }
+            } while (next);
+        } catch (NullPointerException npe) {
+            throw new OlivaDevelopException(PERSISTENCE, "La entidad está nula");
+        }
         return fields;
     }
 
-    public static <T extends BasicEntity> KeyValuePair<String, Object> getPkFromEntity(T entity) throws IllegalAccessException {
+    public static <T extends BasicEntity> KeyValuePair<String, Object> getPkFromEntity(T entity) throws IllegalAccessException, OlivaDevelopException {
         KeyValuePair<String, Object> retorno = null;
         for (Field field : getAllFieldsFromEntity(entity)) {
             field.setAccessible(true);
@@ -86,7 +90,7 @@ public class Utils {
     }
 
     public static <T extends BasicEntity> String getTableNameFromEntity(T entity) throws OlivaDevelopException {
-        String retorno = null;
+        String retorno;
         Entity ent = entity.getClass().getAnnotation(Entity.class);
         if (isNotNull(ent) && isNotNull(ent.table())) {
             retorno = ent.table().trim();
