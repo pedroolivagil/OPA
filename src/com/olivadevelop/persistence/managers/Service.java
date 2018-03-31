@@ -2,10 +2,16 @@ package com.olivadevelop.persistence.managers;
 
 import com.olivadevelop.persistence.entities.BasicEntity;
 import com.olivadevelop.persistence.utils.*;
+import com.olivadevelop.persistence.utils.parser.StringToTypeParser;
+import com.sun.istack.internal.NotNull;
 import org.json.JSONObject;
 
+import javax.rmi.CORBA.Util;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
 
 /**
  * Copyright OlivaDevelop 2014-2018
@@ -81,18 +87,34 @@ final class Service {
 
     <T extends BasicEntity> void add(T entity, MODE mode) throws OlivaDevelopException {
         if (MODE.PERSIST.equals(mode)) {
-            entity = nextVal(entity);
+            try {
+                entity = nextVal(entity);
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                logger.error(e);
+                throw new OlivaDevelopException(PERSISTENCE, "No se pudo generar la PK para la entidad " + entity.getClass().getSimpleName());
+            }
         }
         entities.add(new KeyValuePair<>(entity, mode));
     }
 
-    private <T extends BasicEntity> T nextVal(T entity) throws OlivaDevelopException {
+    private <T extends BasicEntity> T nextVal(T entity) throws OlivaDevelopException, IllegalAccessException, NoSuchFieldException {
         /*SELECT nextval('$nameSequence') as sequence;*/
+        StringToTypeParser parser = StringToTypeParser.newBuilder().build();
         StringBuilder query = new StringBuilder();
         query.append("SELECT nextval('");
         query.append(Utils.getTableNameFromEntity(entity));
         query.append("') as sequence;");
-        JSONObject id = restService.run(query.toString());
-        return null;
+        JSONObject result = restService.sequence(query.toString());
+        KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity);
+        Object id = parser.parse(result.getString("sequence"), pk.getType());
+        if (Utils.isNotNull(pk)) {
+            Field field = entity.getClass().getDeclaredField(pk.getKey());
+            if (Utils.isNotNull(field)) {
+                field.setAccessible(true);
+                field.set(entity, id);
+                field.setAccessible(false);
+            }
+        }
+        return entity;
     }
 }

@@ -2,6 +2,7 @@ package com.olivadevelop.persistence.managers;
 
 import com.olivadevelop.persistence.utils.Constant;
 import com.olivadevelop.persistence.utils.Logger;
+import com.olivadevelop.persistence.utils.OlivaDevelopException;
 import com.olivadevelop.persistence.utils.Utils;
 import okhttp3.*;
 import org.json.JSONObject;
@@ -10,15 +11,17 @@ import java.net.URL;
 import java.util.List;
 
 import static com.olivadevelop.persistence.utils.Constant.TIMEOUT;
+import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
 
 final class RestService {
-    Logger<Service> logger = new Logger<>(Service.class);
-    JSONObject retorno;
+    private Logger<Service> logger = new Logger<>(Service.class);
+    private JSONObject retorno;
 
 
     private enum PATH {
         EXECUTE("db_manager.php"),
-        FIND("read.php");
+        FIND("read.php"),
+        SEQUENCE("sequence.php");
 
         String v;
 
@@ -59,12 +62,12 @@ final class RestService {
                         retorno.notifyAll();
                     }
                     response.close();
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         });
         thread.start();
-        onPreExecute();
+        onPreExecute(queries);
         onPostExecute();
     }
 
@@ -95,20 +98,60 @@ final class RestService {
                         retorno.notifyAll();
                     }
                     response.close();
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         });
         thread.start();
-        onPreExecute();
+        onPreExecute(query);
         return onPostExecute();
     }
 
-    void onPreExecute() {
-        logger.print("Receiving data from service...");
+    /**
+     * Para las consultas SELECT
+     *
+     * @param query
+     * @return
+     */
+    JSONObject sequence(final String query) {
+        retorno = new JSONObject();
+        Thread thread = new Thread(() -> {
+            synchronized (retorno) {
+                try {
+                    FormBody.Builder formbody = new FormBody.Builder();
+                    formbody.add("query", query);
+                    URL url = new URL(Constant.SERVICE_URL + PATH.SEQUENCE.v());
+                    OkHttpClient client = new OkHttpClient();
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .post(formbody.build())
+                            .build();
+                    Response response = client.newCall(request).execute();
+                    ResponseBody body = response.body();
+                    if (Utils.isNotNull(body)) {
+                        String result = body.string();
+                        retorno = new JSONObject(result);
+                        retorno.notifyAll();
+                    }
+                    response.close();
+                } catch (Exception ignored) {
+                }
+            }
+        });
+        thread.start();
+        onPreExecute(query);
+        return onPostExecute();
     }
 
-    JSONObject onPostExecute() {
+    private void onPreExecute(List<String> queries) {
+        onPreExecute(String.join(",", queries));
+    }
+
+    private void onPreExecute(String query) {
+        logger.print("Receiving/Sending data from/to service... (Queries = {" + query + "})");
+    }
+
+    private JSONObject onPostExecute() {
         try {
             synchronized (retorno) {
                 if (Utils.isNull(retorno)) {
@@ -116,9 +159,8 @@ final class RestService {
                 }
                 //logger.print(retorno.toString());
             }
-        } catch (InterruptedException e) {
-        } finally {
-            return retorno;
+        } catch (InterruptedException ignored) {
         }
+        return retorno;
     }
 }

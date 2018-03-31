@@ -8,11 +8,19 @@ public class MainTest {
     public static void main(String args[]) {
         Test tester = new Test();
         TestEntity testEntity = new TestEntity();
-        testEntity.setId(122423);
+        /*testEntity.setId(122423);*/
         testEntity.setName("Pedro");
         testEntity.setApellido("Oliva");
         testEntity.setBool(true);
         testEntity.setPrecio(20.54);
+
+
+        TestEntity testEntityUpdate = new TestEntity();
+        testEntityUpdate.setId(658);
+        testEntityUpdate.setName("Pedro J.");
+        testEntityUpdate.setApellido("Oliva");
+        testEntityUpdate.setBool(true);
+        testEntityUpdate.setPrecio(20.54);
 
         // lanzamos los testers
         /*tester.testQuery(testEntity);
@@ -23,7 +31,8 @@ public class MainTest {
         tester.testDelete(testEntity);*/
         TestController controller = new TestController();
         try {
-            controller.create(testEntity);
+            /*controller.create(testEntity);*/
+            controller.delete(testEntityUpdate);
         } catch (OlivaDevelopException e) {
             logger.error(e);
         }

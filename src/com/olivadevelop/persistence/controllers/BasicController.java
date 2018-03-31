@@ -68,15 +68,15 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
         em.flush();
     }
 
-    public void preCreate(T entity) {
+    protected void preCreate(T entity) {
 
     }
 
-    public void preUpdate(T entity) {
+    protected void preUpdate(T entity) {
 
     }
 
-    public void preDelete(T entity) {
+    protected void preDelete(T entity) {
 
     }
 

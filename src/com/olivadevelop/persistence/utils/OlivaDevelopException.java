@@ -51,8 +51,4 @@ public class OlivaDevelopException extends Exception {
         }
         return errorText;
     }
-
-    public String getTypeException() {
-        return typeException.toString();
-    }
 }

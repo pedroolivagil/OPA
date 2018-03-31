@@ -9,13 +9,19 @@ public class KeyValuePair<K, V> {
 
     private K key;
     private V value;
+    private Class type;
 
     public KeyValuePair() {
     }
 
     public KeyValuePair(K key, V value) {
+        this(key, value, null);
+    }
+
+    public KeyValuePair(K key, V value, Class type) {
         this.key = key;
         this.value = value;
+        this.type = type;
     }
 
     public K getKey() {
@@ -36,5 +42,13 @@ public class KeyValuePair<K, V> {
 
     public String getValueAsString() {
         return String.valueOf(value);
+    }
+
+    public Class getType() {
+        return type;
+    }
+
+    public void setType(Class type) {
+        this.type = type;
     }
 }

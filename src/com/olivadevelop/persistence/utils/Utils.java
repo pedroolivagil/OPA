@@ -82,7 +82,7 @@ public class Utils {
             field.setAccessible(true);
             Id pk = field.getAnnotation(Id.class);
             if (Utils.isNotNull(pk)) {
-                retorno = new KeyValuePair<>(field.getName(), field.get(entity));
+                retorno = new KeyValuePair<>(field.getName(), field.get(entity), field.getType());
             }
             field.setAccessible(false);
         }
