@@ -27,6 +27,10 @@ public class Utils {
         return object == null || (object.toString().trim().equals("{}"));
     }
 
+    public static boolean isNotNull(JSONObject object) {
+        return !isNull(object);
+    }
+
     public static boolean isNotNull(Object obj) {
         return !isNull(obj);
     }

@@ -11,6 +11,8 @@ import com.olivadevelop.persistence.utils.Utils;
 
 import java.util.List;
 
+import static com.olivadevelop.persistence.utils.QueryBuilder.Query.ORDER_BY.ASC;
+
 /**
  * Copyright OlivaDevelop 2014-2018
  * Created by Oliva on 23/01/2018.
@@ -32,18 +34,20 @@ public class BasicController<T extends BasicEntity> implements ControllerMethods
     }
 
     @Override
-    public T read(QueryBuilder queryBuilder) {
-        return null;
+    public T read(QueryBuilder queryBuilder) throws OlivaDevelopException {
+        return em.singleQuery(queryBuilder.toString(), entityClass);
     }
 
     @Override
-    public List<T> readAll(QueryBuilder queryBuilder) {
-        return null;
+    public List<T> readAll(QueryBuilder queryBuilder) throws OlivaDevelopException {
+        return em.createQuery(queryBuilder.toString(), entityClass);
     }
 
     @Override
-    public List<T> readAll() {
-        return null;
+    public List<T> readAll() throws OlivaDevelopException {
+        QueryBuilder.Query query = new QueryBuilder.Query();
+        query.from(entityClass).find().distinct();
+        return em.createQuery(query.toString(), entityClass);
     }
 
     @Override

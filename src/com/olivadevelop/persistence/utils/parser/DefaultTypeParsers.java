@@ -45,9 +45,9 @@ public class DefaultTypeParsers {
             @Override
             public Boolean parse(final String value0) {
                 String value = value0.trim().toLowerCase();
-                if (value.equals("true")) {
+                if (value.equals("true") || value.equals("1")) {
                     return Boolean.TRUE;
-                } else if (value.equals("false")) {
+                } else if (value.equals("false") || value.equals("0")) {
                     return Boolean.FALSE;
                 }
                 throw new IllegalArgumentException(String.format(BOOLEAN_ERROR_MESSAGE, value0));

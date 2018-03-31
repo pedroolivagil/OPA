@@ -59,7 +59,7 @@ final class RestService {
                     if (Utils.isNotNull(body)) {
                         String result = body.string();
                         retorno = new JSONObject(result);
-                        retorno.notifyAll();
+                        retorno.notify();
                     }
                     response.close();
                 } catch (Exception ignored) {
@@ -95,7 +95,7 @@ final class RestService {
                     if (Utils.isNotNull(body)) {
                         String result = body.string();
                         retorno = new JSONObject(result);
-                        retorno.notifyAll();
+                        retorno.notify();
                     }
                     response.close();
                 } catch (Exception ignored) {
@@ -131,7 +131,7 @@ final class RestService {
                     if (Utils.isNotNull(body)) {
                         String result = body.string();
                         retorno = new JSONObject(result);
-                        retorno.notifyAll();
+                        retorno.notify();
                     }
                     response.close();
                 } catch (Exception ignored) {
@@ -157,7 +157,6 @@ final class RestService {
                 if (Utils.isNull(retorno)) {
                     retorno.wait(TIMEOUT);
                 }
-                //logger.print(retorno.toString());
             }
         } catch (InterruptedException ignored) {
         }

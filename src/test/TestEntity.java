@@ -3,6 +3,8 @@ package test;
 import com.olivadevelop.persistence.annotations.Entity;
 import com.olivadevelop.persistence.annotations.Id;
 import com.olivadevelop.persistence.entities.BasicEntity;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @Entity(table = "test")
 public class TestEntity extends BasicEntity {
@@ -15,6 +17,10 @@ public class TestEntity extends BasicEntity {
     private boolean bool;
 
     public TestEntity() {
+    }
+
+    public TestEntity(JSONObject json) throws JSONException {
+        super(json);
     }
 
     public Integer getId() {

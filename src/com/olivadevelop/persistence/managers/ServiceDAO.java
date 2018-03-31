@@ -22,7 +22,7 @@ public final class ServiceDAO implements EntityManager {
     }
 
     @Override
-    public <T extends BasicEntity> T singleQuery(String query, Class<T> entity) {
+    public <T extends BasicEntity> T singleQuery(String query, Class<T> entity) throws OlivaDevelopException {
         JSONPersistence<T> jsonPersistence = new JSONPersistence<>(entity);
         JSONObject retorno = service.execute(query);
         return jsonPersistence.getEntity(retorno);
@@ -36,14 +36,14 @@ public final class ServiceDAO implements EntityManager {
     }
 
     @Override
-    public <T extends BasicEntity> T find(Class<T> entity, Object id) {
+    public <T extends BasicEntity> T find(Class<T> entity, Object id) throws OlivaDevelopException {
         JSONObject retorno = null;
         JSONPersistence<T> jsonPersistence = new JSONPersistence<>(entity);
         try {
             QueryBuilder.Query query = new QueryBuilder.Query();
             KeyValuePair<String, Object> field = Utils.getPkFromEntity(entity.newInstance());
-            query.find();
             query.from(entity);
+            query.find();
             query.where(field.getKey() + " = " + id);
             query.orderBy(field.getKey(), QueryBuilder.Query.ORDER_BY.ASC);
             retorno = service.execute(query.toString());

@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
 import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.UNIQUE_NOT_NULL;
 
 
@@ -210,7 +211,7 @@ public class JSONPersistence<T extends BasicEntity> {
      * @return
      * @throws JSONException
      */
-    public T getEntity(JSONObject json) throws JSONException {
+    public T getEntity(JSONObject json) throws JSONException, OlivaDevelopException {
         return parseJsonToEntity(json, this.entityClass);
     }
 
@@ -221,7 +222,7 @@ public class JSONPersistence<T extends BasicEntity> {
      * @param entity entity class to parse it
      * @return entity object
      */
-    private T parseJsonToEntity(JSONObject json, Class<T> entity) throws JSONException {
+    private T parseJsonToEntity(JSONObject json, Class<T> entity) throws JSONException, OlivaDevelopException {
         T retorno = null;
         if (Utils.isNotNull(json)) {
             int code = json.getInt("result");
@@ -230,6 +231,8 @@ public class JSONPersistence<T extends BasicEntity> {
                 if (Utils.isNotNull(array)) {
                     retorno = constructObject(array, entity, 0);
                 }
+            } else {
+                throw new OlivaDevelopException(PERSISTENCE, json.getString("message"));
             }
         }
         return retorno;

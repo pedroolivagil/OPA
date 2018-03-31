@@ -98,7 +98,6 @@ final class Service {
     }
 
     private <T extends BasicEntity> T nextVal(T entity) throws OlivaDevelopException, IllegalAccessException, NoSuchFieldException {
-        /*SELECT nextval('$nameSequence') as sequence;*/
         StringToTypeParser parser = StringToTypeParser.newBuilder().build();
         StringBuilder query = new StringBuilder();
         query.append("SELECT nextval('");
