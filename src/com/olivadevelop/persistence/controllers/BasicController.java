@@ -1,87 +1,20 @@
 package com.olivadevelop.persistence.controllers;
 
-import com.olivadevelop.persistence.annotations.PersistenceUnit;
 import com.olivadevelop.persistence.entities.BasicEntity;
-import com.olivadevelop.persistence.interfaces.ControllerMethods;
-import com.olivadevelop.persistence.interfaces.EntityManager;
-import com.olivadevelop.persistence.managers.ServiceDAO;
-import com.olivadevelop.persistence.utils.OlivaDevelopException;
-import com.olivadevelop.persistence.utils.QueryBuilder;
-import com.olivadevelop.persistence.utils.Utils;
-
-import java.util.List;
-
-import static com.olivadevelop.persistence.utils.QueryBuilder.Query.ORDER_BY.ASC;
 
 /**
  * Copyright OlivaDevelop 2014-2018
  * Created by Oliva on 23/01/2018.
+ * <p>
+ * Para crear controladores, extender de esta clase y usar sus métodos.
+ * <p>
+ * El controlador administra las entidades relacionadas con dicho contralador y las envía al servicio REST
+ *
+ * @param <T> Tipo de entidad
  */
-public class BasicController<T extends BasicEntity> implements ControllerMethods<T> {
-
-    @PersistenceUnit
-    private final EntityManager em;
-    private Class<T> entityClass;
+public class BasicController<T extends BasicEntity> extends Controller<T> {
 
     public BasicController(Class<T> entityClass) {
-        em = new ServiceDAO();
-        this.entityClass = entityClass;
+        super(entityClass);
     }
-
-    @Override
-    public T read(Integer idEntity) throws OlivaDevelopException {
-        return em.find(entityClass, idEntity);
-    }
-
-    @Override
-    public T read(QueryBuilder queryBuilder) throws OlivaDevelopException {
-        return em.singleQuery(queryBuilder.toString(), entityClass);
-    }
-
-    @Override
-    public List<T> readAll(QueryBuilder queryBuilder) throws OlivaDevelopException {
-        return em.createQuery(queryBuilder.toString(), entityClass);
-    }
-
-    @Override
-    public List<T> readAll() throws OlivaDevelopException {
-        QueryBuilder.Query query = new QueryBuilder.Query();
-        query.from(entityClass).find().distinct();
-        return em.createQuery(query.toString(), entityClass);
-    }
-
-    @Override
-    public void create(T entity) throws OlivaDevelopException {
-        preCreate(entity);
-        em.persist(entity);
-        em.flush();
-    }
-
-    @Override
-    public T update(T entity) throws OlivaDevelopException {
-        preUpdate(entity);
-        entity = em.merge(entity);
-        em.flush();
-        return entity;
-    }
-
-    @Override
-    public void delete(T entity) throws OlivaDevelopException {
-        preDelete(entity);
-        em.remove(entity);
-        em.flush();
-    }
-
-    protected void preCreate(T entity) {
-
-    }
-
-    protected void preUpdate(T entity) {
-
-    }
-
-    protected void preDelete(T entity) {
-
-    }
-
 }
