@@ -20,6 +20,8 @@ import java.util.List;
 /**
  * Copyright OlivaDevelop 2014-2018
  * Created by Oliva on 23/01/2018.
+ * <p>
+ * Para definir una entidad, debe añadirse la anotación Entity y añadir la tabla relacionada y su secuencia
  */
 public class BasicEntity implements Serializable {
     Logger<BasicEntity> logger = new Logger<>(BasicEntity.class);

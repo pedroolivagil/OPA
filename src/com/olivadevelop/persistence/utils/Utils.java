@@ -80,26 +80,32 @@ public class Utils {
         return fields;
     }
 
-    public static <T extends BasicEntity> KeyValuePair<String, Object> getPkFromEntity(T entity) throws IllegalAccessException, OlivaDevelopException {
-        KeyValuePair<String, Object> retorno = null;
+    public static <T extends BasicEntity> FieldData<String, Object> getPkFromEntity(T entity) throws IllegalAccessException, OlivaDevelopException {
+        FieldData<String, Object> retorno = null;
         for (Field field : getAllFieldsFromEntity(entity)) {
             field.setAccessible(true);
             Id pk = field.getAnnotation(Id.class);
             if (Utils.isNotNull(pk)) {
-                retorno = new KeyValuePair<>(field.getName(), field.get(entity), field.getType());
+                retorno = new FieldData<>(field.getName(), field.get(entity), field.getType(), pk.insertable());
             }
             field.setAccessible(false);
         }
         return retorno;
     }
 
-    public static <T extends BasicEntity> String getTableNameFromEntity(T entity) throws OlivaDevelopException {
+    public static <T extends BasicEntity> String getSequenceNameFromEntity(T entity) throws OlivaDevelopException {
         String retorno;
         Entity ent = entity.getClass().getAnnotation(Entity.class);
-        if (isNotNull(ent) && isNotNull(ent.table())) {
-            retorno = ent.table().trim();
+        if (isNotNull(ent)) {
+            retorno = ent.sequenceName();
+            if (isNull(retorno)) {
+                retorno = ent.table();
+            }
+            if (isNull(retorno)) {
+                throw new OlivaDevelopException(PERSISTENCE, "La entidad no tiene una tabla y/o secuencia definidas");
+            }
         } else {
-            throw new OlivaDevelopException(PERSISTENCE, "La entidad no tiene una tabla definida");
+            throw new OlivaDevelopException(PERSISTENCE, "La entidad no es una entidad. Debe definirse una entidad usando @Entity y extendiendo de BasicEntity");
         }
         return retorno;
     }
@@ -112,6 +118,7 @@ public class Utils {
      * @return
      * @throws IllegalAccessException
      */
+
     public static <T extends BasicEntity> boolean ignoreField(Field field, T entity) throws IllegalAccessException {
         boolean retorno = false;
         List<Boolean> list = new ArrayList<>();

@@ -33,9 +33,9 @@ final class Service {
         PERSIST, MERGE, REMOVE
     }
 
-    Logger<Service> logger = new Logger<>(Service.class);
-    List<KeyValuePair<BasicEntity, MODE>> entities = new ArrayList<>();
-    RestService restService = new RestService();
+    private Logger<Service> logger = new Logger<>(Service.class);
+    private RestService restService = new RestService();
+    private List<KeyValuePair<BasicEntity, MODE>> entities = new ArrayList<>();
 
     /**
      * Recive un string con la query y devuelve un JSON con los resultados.
@@ -44,7 +44,13 @@ final class Service {
      * @return
      */
     JSONObject execute(String query) {
-        return restService.run(query);
+        JSONObject retorno = null;
+        try {
+            retorno = restService.run(query);
+        } catch (OlivaDevelopException e) {
+            logger.error(e);
+        }
+        return retorno;
     }
 
     /**
@@ -54,7 +60,7 @@ final class Service {
         try {
             List<String> queries = new ArrayList<>();
             for (KeyValuePair<BasicEntity, MODE> entity : entities) {
-                KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity.getKey());
+                FieldData<String, Object> pk = Utils.getPkFromEntity(entity.getKey());
                 switch (entity.getValue()) {
                     case MERGE:
                         QueryBuilder.Update update = new QueryBuilder.Update();
@@ -98,20 +104,22 @@ final class Service {
     }
 
     private <T extends BasicEntity> T nextVal(T entity) throws OlivaDevelopException, IllegalAccessException, NoSuchFieldException {
-        StringToTypeParser parser = StringToTypeParser.newBuilder().build();
-        StringBuilder query = new StringBuilder();
-        query.append("SELECT nextval('");
-        query.append(Utils.getTableNameFromEntity(entity));
-        query.append("') as sequence;");
-        JSONObject result = restService.sequence(query.toString());
-        KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity);
-        Object id = parser.parse(result.getString("sequence"), pk.getType());
-        if (Utils.isNotNull(pk)) {
-            Field field = entity.getClass().getDeclaredField(pk.getKey());
-            if (Utils.isNotNull(field)) {
-                field.setAccessible(true);
-                field.set(entity, id);
-                field.setAccessible(false);
+        FieldData<String, Object> pk = Utils.getPkFromEntity(entity);
+        if (pk.isInsertable()) {
+            StringToTypeParser parser = StringToTypeParser.newBuilder().build();
+            StringBuilder query = new StringBuilder();
+            query.append("SELECT nextval('");
+            query.append(Utils.getSequenceNameFromEntity(entity));
+            query.append("') as sequence;");
+            JSONObject result = restService.sequence(query.toString());
+            Object id = parser.parse(result.getString("sequence"), pk.getType());
+            if (Utils.isNotNull(pk)) {
+                Field field = entity.getClass().getDeclaredField(pk.getKey());
+                if (Utils.isNotNull(field)) {
+                    field.setAccessible(true);
+                    field.set(entity, id);
+                    field.setAccessible(false);
+                }
             }
         }
         return entity;

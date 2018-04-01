@@ -30,13 +30,22 @@ public class MainTest {
             /*controller.create(testEntity);
             testEntity.setName("Olivadevelop SL");
             controller.update(testEntity);*/
-            logger.print(controller.read(981).toString());
+            TestEntity ent = controller.read(981);
+            logger.print(ent.toString());
+            logger.print("---------------------------");
+            ent.setId(123);
+            controller.update(ent);
             logger.print("---------------------------");
 
             List<TestEntity> all = controller.readAll();
             for (TestEntity t : all) {
                 logger.print(t.toString());
             }
+            logger.print("---------------------------");
+            QueryBuilder.Query query = new QueryBuilder.Query();
+            query.from(TestEntity.class).find().where("id = 929");
+            TestEntity ent1 = controller.read(query);
+            logger.print(ent1.toString());
         } catch (OlivaDevelopException e) {
             logger.error(e);
         }
@@ -95,7 +104,7 @@ class Test {
         logger.print(".testUpdate() is IN");
         QueryBuilder.Update qb = new QueryBuilder.Update();
         try {
-            KeyValuePair<String, Object> pk = Utils.getPkFromEntity(entity);
+            FieldData<String, Object> pk = Utils.getPkFromEntity(entity);
             qb.from(entity.getClass());
             qb.values(entity);
             qb.where(pk.getKey().concat(" = ").concat(pk.getValueAsString()));

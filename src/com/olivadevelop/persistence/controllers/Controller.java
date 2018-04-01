@@ -29,12 +29,12 @@ class Controller<T extends BasicEntity> implements ControllerMethods<T> {
     }
 
     @Override
-    public T read(QueryBuilder queryBuilder) throws OlivaDevelopException {
+    public T read(QueryBuilder.Query queryBuilder) throws OlivaDevelopException {
         return em.singleQuery(queryBuilder.toString(), entityClass);
     }
 
     @Override
-    public List<T> readAll(QueryBuilder queryBuilder) throws OlivaDevelopException {
+    public List<T> readAll(QueryBuilder.Query queryBuilder) throws OlivaDevelopException {
         return em.createQuery(queryBuilder.toString(), entityClass);
     }
 

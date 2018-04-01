@@ -15,4 +15,6 @@ import java.lang.annotation.Target;
 public @interface Entity {
 
     String table() default "";
+
+    String sequenceName() default "";
 }

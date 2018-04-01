@@ -16,9 +16,9 @@ public interface ControllerMethods<T extends BasicEntity> {
 
     T read(Integer idEntity) throws OlivaDevelopException;
 
-    T read(QueryBuilder queryBuilder) throws OlivaDevelopException;
+    T read(QueryBuilder.Query queryBuilder) throws OlivaDevelopException;
 
-    List<T> readAll(QueryBuilder queryBuilder) throws OlivaDevelopException;
+    List<T> readAll(QueryBuilder.Query queryBuilder) throws OlivaDevelopException;
 
     List<T> readAll() throws OlivaDevelopException;
 

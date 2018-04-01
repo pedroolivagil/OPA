@@ -18,8 +18,8 @@ class JoinQuery<T extends BasicEntity, E extends BasicEntity> {
     private String tableJoin;
     private String alias;
     private String aliasJoin;
-    private KeyValuePair<String, Object> id;
-    private KeyValuePair<String, Object> idJoin;
+    private FieldData<String, Object> id;
+    private FieldData<String, Object> idJoin;
 
     public JoinQuery() {
     }

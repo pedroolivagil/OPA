@@ -33,16 +33,16 @@ public abstract class QueryBuilder {
             return find("* ");
         }
 
-        public Query find(String... columns) throws OlivaDevelopException {
+        private Query find(String... columns) throws OlivaDevelopException {
             if (Utils.isNull(from)) {
                 throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
             }
-            this.fields = String.join(",", columns);
+            this.fields = " " + String.join(",", columns);
             return this;
         }
 
         public Query distinct() {
-            this.fields = "DISTINCT " + this.fields;
+            this.fields = " DISTINCT " + this.fields;
             return this;
         }
 
@@ -50,7 +50,7 @@ public abstract class QueryBuilder {
             if (Utils.isNull(from)) {
                 throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
             }
-            this.fields = "COUNT(" + column + ") ";
+            this.fields = " COUNT(" + column + ")";
             return this;
         }
 
@@ -60,7 +60,7 @@ public abstract class QueryBuilder {
                     Entity entity = opa.getAnnotation(Entity.class);
                     if (Utils.isNotNull(entity)) {
                         if (Utils.isNotNull(entity.table())) {
-                            this.from = "FROM " + entity.table() + " " + entity.table();
+                            this.from = " FROM " + entity.table() + " " + entity.table();
                         } else {
                             throw new OlivaDevelopException(PERSISTENCE, "La entidad no tiene una tabla relacionada");
                         }
@@ -120,7 +120,7 @@ public abstract class QueryBuilder {
         @Override
         public String toString() {
             StringBuilder query = new StringBuilder();
-            query.append("SELECT ");
+            query.append("SELECT");
             query.append(this.fields);
             query.append(this.from);
             if (Utils.isNotNull(this.joins)) {

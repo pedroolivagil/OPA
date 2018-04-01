@@ -41,7 +41,7 @@ public final class ServiceDAO implements EntityManager {
         JSONPersistence<T> jsonPersistence = new JSONPersistence<>(entity);
         try {
             QueryBuilder.Query query = new QueryBuilder.Query();
-            KeyValuePair<String, Object> field = Utils.getPkFromEntity(entity.newInstance());
+            FieldData<String, Object> field = Utils.getPkFromEntity(entity.newInstance());
             query.from(entity);
             query.find();
             query.where(field.getKey() + " = " + id);

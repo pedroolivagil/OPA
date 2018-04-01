@@ -23,7 +23,7 @@ public class JSONPersistence<T extends BasicEntity> {
     private static final String ENTITY = "entity";
 
     public enum REQUEST {
-        CODE_200(200), CODE_404(404);
+        CODE_200(200), CODE_100(100), CODE_404(404);
         int code;
 
         REQUEST(int code) {
