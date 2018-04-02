@@ -1,7 +1,6 @@
 package com.olivadevelop.persistence.utils;
 
-import com.olivadevelop.persistence.annotations.Entity;
-import com.olivadevelop.persistence.annotations.Id;
+import com.olivadevelop.persistence.annotations.*;
 import com.olivadevelop.persistence.entities.BasicEntity;
 
 import java.lang.reflect.Field;
@@ -23,26 +22,15 @@ public abstract class QueryBuilder {
             ASC, DESC
         }
 
-        String fields;
+        List<String> fields = new ArrayList<>();
+        boolean distinct = false;
         String from;
         StringBuilder joins;
         StringBuilder where;
         String orderBy;
 
-        public Query find() throws OlivaDevelopException {
-            return find("* ");
-        }
-
-        private Query find(String... columns) throws OlivaDevelopException {
-            if (Utils.isNull(from)) {
-                throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
-            }
-            this.fields = " " + String.join(",", columns);
-            return this;
-        }
-
         public Query distinct() {
-            this.fields = " DISTINCT " + this.fields;
+            this.distinct = true;
             return this;
         }
 
@@ -50,7 +38,7 @@ public abstract class QueryBuilder {
             if (Utils.isNull(from)) {
                 throw new OlivaDevelopException(PERSISTENCE, "FROM debe ser definido préviamente.");
             }
-            this.fields = " COUNT(" + column + ")";
+            /*this.fields = " COUNT(" + column + ")";*/
             return this;
         }
 
@@ -60,6 +48,20 @@ public abstract class QueryBuilder {
                     Entity entity = opa.getAnnotation(Entity.class);
                     if (Utils.isNotNull(entity)) {
                         if (Utils.isNotNull(entity.table())) {
+                            for (Field f : Utils.getAllFieldsFromEntity(opa.newInstance())) {
+                                f.setAccessible(true);
+                                OneToOne oto = f.getAnnotation(OneToOne.class);
+                                OneToMany otm = f.getAnnotation(OneToMany.class);
+                                if (Utils.isNull(oto) && Utils.isNull(otm)) {
+                                    String name = f.getName();
+                                    Persistence p = f.getAnnotation(Persistence.class);
+                                    if (Utils.isNotNull(p)) {
+                                        name = p.column();
+                                    }
+                                    fields.add(entity.table() + "." + name + " AS '" + entity.table() + "." + name + "'");
+                                }
+                                f.setAccessible(false);
+                            }
                             this.from = " FROM " + entity.table() + " " + entity.table();
                         } else {
                             throw new OlivaDevelopException(PERSISTENCE, "La entidad no tiene una tabla relacionada");
@@ -76,11 +78,14 @@ public abstract class QueryBuilder {
             return this;
         }
 
-        public <T extends BasicEntity, E extends BasicEntity> Query join(List<JoinQuery<T, E>> opas) throws OlivaDevelopException {
-            if (Utils.isNotEmpty(opas)) {
-                for (JoinQuery<T, E> opa : opas) {
-                    this.joins.append(opa.toString());
+        public <T extends BasicEntity> Query join(JoinQuery joins) throws OlivaDevelopException {
+            if (Utils.isNotNull(joins)) {
+                for (String field : joins.getFields()) {
+                    if (!fields.contains(field)) {
+                        fields.add(field);
+                    }
                 }
+                this.joins.append(joins.toJoin());
             }
             return this;
         }
@@ -120,8 +125,11 @@ public abstract class QueryBuilder {
         @Override
         public String toString() {
             StringBuilder query = new StringBuilder();
-            query.append("SELECT");
-            query.append(this.fields);
+            query.append("SELECT ");
+            if (this.distinct) {
+                query.append(" DISTINCT ");
+            }
+            query.append(String.join(", ", this.fields));
             query.append(this.from);
             if (Utils.isNotNull(this.joins)) {
                 query.append(this.joins);

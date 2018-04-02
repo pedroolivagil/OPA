@@ -1,10 +1,10 @@
 package com.olivadevelop.persistence.utils;
 
-import com.olivadevelop.persistence.annotations.Entity;
-import com.olivadevelop.persistence.annotations.Id;
+import com.olivadevelop.persistence.annotations.*;
 import com.olivadevelop.persistence.entities.BasicEntity;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,6 +78,26 @@ public class Utils {
             throw new OlivaDevelopException(PERSISTENCE, "La entidad está nula");
         }
         return fields;
+    }
+
+    public static <T extends BasicEntity> List<String> getFieldAliasFromEntity(T entity) throws OlivaDevelopException {
+        List<String> retorno = new ArrayList<>();
+        Entity ent = entity.getClass().getAnnotation(Entity.class);
+        for (Field f : Utils.getAllFieldsFromEntity(entity)) {
+            f.setAccessible(true);
+            OneToOne oto = f.getAnnotation(OneToOne.class);
+            OneToMany otm = f.getAnnotation(OneToMany.class);
+            if (Utils.isNull(oto) && Utils.isNull(otm)) {
+                String name = f.getName();
+                Persistence p = f.getAnnotation(Persistence.class);
+                if (Utils.isNotNull(p)) {
+                    name = p.column();
+                }
+                retorno.add(ent.table() + "." + name + " AS '" + ent.table() + "." + name + "'");
+            }
+            f.setAccessible(false);
+        }
+        return retorno;
     }
 
     public static <T extends BasicEntity> FieldData<String, Object> getPkFromEntity(T entity) throws IllegalAccessException, OlivaDevelopException {

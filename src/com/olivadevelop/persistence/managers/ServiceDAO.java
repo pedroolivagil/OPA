@@ -43,7 +43,6 @@ public final class ServiceDAO implements EntityManager {
             QueryBuilder.Query query = new QueryBuilder.Query();
             FieldData<String, Object> field = Utils.getPkFromEntity(entity.newInstance());
             query.from(entity);
-            query.find();
             query.where(field.getKey() + " = " + id);
             query.orderBy(field.getKey(), QueryBuilder.Query.ORDER_BY.ASC);
             retorno = service.execute(query.toString());

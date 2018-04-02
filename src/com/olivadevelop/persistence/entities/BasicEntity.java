@@ -1,5 +1,6 @@
 package com.olivadevelop.persistence.entities;
 
+import com.olivadevelop.persistence.annotations.Entity;
 import com.olivadevelop.persistence.annotations.OneToMany;
 import com.olivadevelop.persistence.annotations.OneToOne;
 import com.olivadevelop.persistence.annotations.Persistence;
@@ -70,50 +71,74 @@ public class BasicEntity implements Serializable {
                 //Field[] fields = getClass().getDeclaredFields();
                 List<Field> fields = Utils.getAllFieldsFromEntity(this);
                 if (Utils.isNotNull(fields)) {
+                    String fName;
                     for (Field field : fields) {
                         field.setAccessible(true);
-                        String fName = field.getName();
-                        if (!Utils.ignoreField(field, this)) {
-                            // Obtenemos el nombre de la propiedad que se le pasa por el JSON,
-                            // por defecto será el nombre de la propiedad Java (el nombre en una
-                            // lista será el nombre de la clase relacionada en plural)
+                        fName = field.getName();
+                        OneToOne oto = field.getAnnotation(OneToOne.class);
+                        OneToMany otm = field.getAnnotation(OneToMany.class);
+                        if (Utils.isNull(oto) && Utils.isNull(otm)) {
+                            if (!Utils.ignoreField(field, this)) {
+                                // Obtenemos el nombre de la propiedad que se le pasa por el JSON,
+                                // por defecto será el nombre de la propiedad Java (el nombre en una
+                                // lista será el nombre de la clase relacionada en plural)
+                                Persistence persistence = field.getAnnotation(Persistence.class);
+                                if (Utils.isNotNull(persistence) && Utils.isNotNull(persistence.column())) {
+                                    fName = persistence.column();
+                                }
+                                Entity ent = this.getClass().getAnnotation(Entity.class);
+                                fName = ent.table() + "." + fName;
+                                // Obtenemos el valor del JSON, que puede ser de cualquier tipo
+                                Object value = parser.parse(String.valueOf(json.get(fName)), field.getType());
+
+                                // Si el valor es alguno de los primitivos, es decir, no es una lista ni una entidad
+                                if (value instanceof Boolean
+                                        || value instanceof Byte
+                                        || value instanceof Integer
+                                        || value instanceof Long
+                                        || value instanceof Float
+                                        || value instanceof Double
+                                        || value instanceof String) {
+                                    field.set(this, value);
+                            /*} else if (value instanceof byte[]) {
+                            // TODO: los byte[] agregados a la bbdd, se almacenan como strings, por el momento. Valorar si es correcto o buscar una forma más adecuada para hacer el cast como una anotación o algo
+                                field.set(this, ImagePicasso.StringTobase64(value);*/
+                                }
+                            }
+                            field.setAccessible(false);
+                        } else {
+                            // intentamos obtener los objetos de las relaciones.
+                        /*if (value instanceof JSONArray) {
+                            // Si es un array, debemos generar un objeto por cada elemento del array y asignarlo a la lista
+                            JSONArray jsonArray = (JSONArray) value;
+                            OneToMany oneToMany = field.getAnnotation(OneToMany.class);
+                            List<BasicEntity> entities = new ArrayList<>();
+                            for (int x = 0; x < jsonArray.length(); x++) {
+                                JSONObject jObj = jsonArray.getJSONObject(x);
+                                BasicEntity elem = (BasicEntity) oneToMany.mappingClass().getConstructor(JSONObject.class).newInstance(jObj);
+                                entities.add(elem);
+                            }
+                            field.set(this, entities);
+                        } else if (value instanceof JSONObject) {
+                            OneToOne oneToOne = field.getAnnotation(OneToOne.class);
+                            BasicEntity elem = (BasicEntity) oneToOne.mappingClass().getConstructor(JSONObject.class).newInstance(value);
+                            field.set(this, elem);
+                        }*/
                             Persistence persistence = field.getAnnotation(Persistence.class);
                             if (Utils.isNotNull(persistence) && Utils.isNotNull(persistence.column())) {
                                 fName = persistence.column();
                             }
-                            // Obtenemos el valor del JSON, que puede ser de cualquier tipo
-                            Object value = parser.parse(String.valueOf(json.get(fName)), field.getType());
-
-                            // Si el valor es alguno de los primitivos, es decir, no es una lista ni una entidad
-                            if (value instanceof Boolean
-                                    || value instanceof Byte
-                                    || value instanceof Integer
-                                    || value instanceof Long
-                                    || value instanceof Float
-                                    || value instanceof Double
-                                    || value instanceof String) {
-                                field.set(this, value);
-                            /*} else if (value instanceof byte[]) {
-                            // TODO: los byte[] agregados a la bbdd, se almacenan como strings, por el momento. Valorar si es correcto o buscar una forma más adecuada para hacer el cast como una anotación o algo
-                                field.set(this, ImagePicasso.StringTobase64(value);*/
-                            } else if (value instanceof JSONArray) {
-                                // Si es un array, debemos generar un objeto por cada elemento del array y asignarlo a la lista
-                                JSONArray jsonArray = (JSONArray) value;
-                                OneToMany oneToMany = field.getAnnotation(OneToMany.class);
-                                List<BasicEntity> entities = new ArrayList<>();
-                                for (int x = 0; x < jsonArray.length(); x++) {
-                                    JSONObject jObj = jsonArray.getJSONObject(x);
-                                    BasicEntity elem = (BasicEntity) oneToMany.mappingClass().getConstructor(JSONObject.class).newInstance(jObj);
-                                    entities.add(elem);
-                                }
-                                field.set(this, entities);
-                            } else if (value instanceof JSONObject) {
+                            Entity ent = this.getClass().getAnnotation(Entity.class);
+                            fName = ent.table() + "." + fName;
+                            Object value = json.get(fName);
+                            if (Utils.isNull(oto)) {
                                 OneToOne oneToOne = field.getAnnotation(OneToOne.class);
                                 BasicEntity elem = (BasicEntity) oneToOne.mappingClass().getConstructor(JSONObject.class).newInstance(value);
                                 field.set(this, elem);
+                            } else if (Utils.isNull(otm)) {
+
                             }
                         }
-                        field.setAccessible(false);
                     }
                 }
             } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException | OlivaDevelopException e) {

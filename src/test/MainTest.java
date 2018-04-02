@@ -42,8 +42,11 @@ public class MainTest {
                 logger.print(t.toString());
             }
             logger.print("---------------------------");
+            JoinQuery jq = new JoinQuery();
+            jq.addJoin(TestEntity.class, TestEntity2.class);
+
             QueryBuilder.Query query = new QueryBuilder.Query();
-            query.from(TestEntity.class).find().where("id = 929");
+            query.from(TestEntity.class).join(jq).where("id = 929");
             TestEntity ent1 = controller.read(query);
             logger.print(ent1.toString());
         } catch (OlivaDevelopException e) {
@@ -60,7 +63,7 @@ class Test {
         logger.print(".testQuery() is IN");
         QueryBuilder.Query qb = new QueryBuilder.Query();
         try {
-            qb.from(TestEntity.class).find();
+            qb.from(TestEntity.class);
         } catch (OlivaDevelopException e) {
             e.printStackTrace();
         }
@@ -71,7 +74,7 @@ class Test {
         logger.print(".testComplexQuery() is IN");
         QueryBuilder.Query qb = new QueryBuilder.Query();
         try {
-            qb.from(TestEntity.class).find().where("id = 23").and("name LIKE 'Pedro'").or("besugo = false").distinct();
+            qb.from(TestEntity.class).where("id = 23").and("name LIKE 'Pedro'").or("besugo = false").distinct();
         } catch (OlivaDevelopException e) {
             e.printStackTrace();
         }

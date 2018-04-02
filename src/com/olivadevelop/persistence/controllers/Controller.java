@@ -41,7 +41,7 @@ class Controller<T extends BasicEntity> implements ControllerMethods<T> {
     @Override
     public List<T> readAll() throws OlivaDevelopException {
         QueryBuilder.Query query = new QueryBuilder.Query();
-        query.from(entityClass).find().distinct();
+        query.from(entityClass).distinct();
         return em.createQuery(query.toString(), entityClass);
     }
 

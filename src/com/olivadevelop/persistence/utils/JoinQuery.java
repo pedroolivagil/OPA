@@ -1,76 +1,86 @@
 package com.olivadevelop.persistence.utils;
 
 import com.olivadevelop.persistence.annotations.Entity;
+import com.olivadevelop.persistence.annotations.OneToMany;
+import com.olivadevelop.persistence.annotations.OneToOne;
+import com.olivadevelop.persistence.annotations.Persistence;
 import com.olivadevelop.persistence.entities.BasicEntity;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.olivadevelop.persistence.utils.OlivaDevelopException.TypeException.PERSISTENCE;
 
 /**
  * Copyright OlivaDevelop 2014-2018
- * Created by Oliva on 23/03/2018.
- * RolerMaster
+ * Created by Oliva on 03/01/2018.
  */
-class JoinQuery<T extends BasicEntity, E extends BasicEntity> {
 
-    private Class<T> entity;
-    private Class<E> entityJoin;
-    private String table;
-    private String tableJoin;
-    private String alias;
-    private String aliasJoin;
-    private FieldData<String, Object> id;
-    private FieldData<String, Object> idJoin;
+public class JoinQuery {
+    Logger<JoinQuery> logger = new Logger<>(JoinQuery.class);
+
+    private List<KeyValuePair<Class<?>, Class<?>>> joins;
+    private List<String> fields;
 
     public JoinQuery() {
+        this.fields = new ArrayList<>();
     }
 
-    public JoinQuery(Class<T> entity, Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException, InstantiationException {
-        setEntity(entity);
-        setEntityJoin(entityJoin);
+    public void addJoin(Class<?> from, Class<?> to) {
+        this.getJoins().add(new KeyValuePair<>(from, to));
     }
 
-    public Class<E> getEntityJoin() {
-        return entityJoin;
-    }
-
-    public Class<T> getEntity() {
-        return entity;
-    }
-
-    public void setEntity(Class<T> entity) throws OlivaDevelopException, IllegalAccessException, InstantiationException {
-        Entity entityAn = entity.getClass().getAnnotation(Entity.class);
-        if (Utils.isNotNull(entityAn)) {
-            this.entity = entity;
-            this.table = entityAn.table();
-            this.alias = entityAn.table();
-            this.id = Utils.getPkFromEntity(entity.newInstance());
-        } else {
-            throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
+    private List<KeyValuePair<Class<?>, Class<?>>> getJoins() {
+        if (Utils.isNull(this.joins)) {
+            this.joins = new ArrayList<>();
         }
+        return joins;
     }
 
-    public void setEntityJoin(Class<E> entityJoin) throws OlivaDevelopException, IllegalAccessException, InstantiationException {
-        Entity entityAn = entityJoin.getClass().getAnnotation(Entity.class);
-        if (Utils.isNotNull(entityAn)) {
-            this.entityJoin = entityJoin;
-            this.tableJoin = entityAn.table();
-            this.aliasJoin = entityAn.table();
-            this.idJoin = Utils.getPkFromEntity(entityJoin.newInstance());
-        } else {
-            throw new OlivaDevelopException(PERSISTENCE, "La clase no es una entidad OPA");
-        }
+    public List<String> getFields() {
+        return fields;
     }
 
-    @Override
-    public String toString() {
+    public String toJoin() throws OlivaDevelopException {
         StringBuilder retorno = new StringBuilder();
-        retorno.append(" LEFT JOIN ");
-        retorno.append(this.tableJoin);
-        retorno.append(" ").append(this.aliasJoin);
-        retorno.append(" ON ");
-        retorno.append(this.aliasJoin).append(".").append(this.idJoin);
-        retorno.append(" = ");
-        retorno.append(this.alias).append(".").append(this.id);
+        try {
+            for (KeyValuePair<Class<?>, Class<?>> join : getJoins()) {
+                Entity entity = join.getKey().getAnnotation(Entity.class);
+                Entity entityJoin = join.getValue().getAnnotation(Entity.class);
+                if (Utils.isNotNull(entity) && Utils.isNotNull(entityJoin)) {
+
+                    for (String field : Utils.getFieldAliasFromEntity((BasicEntity) join.getKey().newInstance())) {
+                        if (!fields.contains(field)) {
+                            fields.add(field);
+                        }
+                    }
+                    for (String field : Utils.getFieldAliasFromEntity((BasicEntity) join.getValue().newInstance())) {
+                        if (!fields.contains(field)) {
+                            fields.add(field);
+                        }
+                    }
+
+                    String alias = entity.table();
+                    String id = Utils.getPkFromEntity((BasicEntity) join.getKey().newInstance()).getKey();
+                    String tableJoin = entityJoin.table();
+                    String aliasJoin = entityJoin.table();
+                    String idJoin = Utils.getPkFromEntity((BasicEntity) join.getValue().newInstance()).getKey();
+
+                    retorno.append(" LEFT JOIN ");
+                    retorno.append(tableJoin);
+                    retorno.append(" ").append(aliasJoin);
+                    retorno.append(" ON ");
+                    retorno.append(aliasJoin).append(".").append(idJoin);
+                    retorno.append(" = ");
+                    retorno.append(alias).append(".").append(id);
+                } else {
+                    throw new OlivaDevelopException(PERSISTENCE, "No se ha podido crear el join, las clases no son entidades OPA");
+                }
+            }
+        } catch (IllegalAccessException | InstantiationException e) {
+            logger.error(e);
+        }
         return retorno.toString();
     }
 }

@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import java.util.List;
 
 @Entity(table = "test")
-public class TestEntity extends BasicEntity {
+public class TestEntity2 extends BasicEntity {
 
     @Id
     private Integer id;
@@ -19,14 +19,10 @@ public class TestEntity extends BasicEntity {
     private Double precio;
     private boolean bool;
 
-    @OneToMany(mappingClass = TestEntity2.class)
-    @RelatedEntity(joinColumn = "id")
-    private List<TestEntity2> testEntity;
-
-    public TestEntity() {
+    public TestEntity2() {
     }
 
-    public TestEntity(JSONObject json) throws JSONException {
+    public TestEntity2(JSONObject json) throws JSONException {
         super(json);
     }
 
@@ -70,14 +66,6 @@ public class TestEntity extends BasicEntity {
         this.bool = bool;
     }
 
-    public List<TestEntity2> getTestEntity() {
-        return testEntity;
-    }
-
-    public void setTestEntity(List<TestEntity2> testEntity) {
-        this.testEntity = testEntity;
-    }
-
     @Override
     public int hashCode() {
         return super.hashCode();
@@ -90,7 +78,7 @@ public class TestEntity extends BasicEntity {
 
     @Override
     public String toString() {
-        return "TestEntity{" +
+        return "TestEntity2{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", apellido='" + apellido + '\'' +
