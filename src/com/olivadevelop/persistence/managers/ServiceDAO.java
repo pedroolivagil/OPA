@@ -1,5 +1,6 @@
 package com.olivadevelop.persistence.managers;
 
+import com.olivadevelop.persistence.annotations.Entity;
 import com.olivadevelop.persistence.entities.BasicEntity;
 import com.olivadevelop.persistence.interfaces.EntityManager;
 import com.olivadevelop.persistence.utils.*;
@@ -40,11 +41,12 @@ public final class ServiceDAO implements EntityManager {
         JSONObject retorno = null;
         JSONPersistence<T> jsonPersistence = new JSONPersistence<>(entity);
         try {
+            Entity ann = entity.getAnnotation(Entity.class);
             QueryBuilder.Query query = new QueryBuilder.Query();
             FieldData<String, Object> field = Utils.getPkFromEntity(entity.newInstance());
             query.from(entity);
-            query.where(field.getKey() + " = " + id);
-            query.orderBy(field.getKey(), QueryBuilder.Query.ORDER_BY.ASC);
+            query.where(ann.table() + "." + field.getKey() + " = " + id);
+            query.orderBy(ann.table() + "." + field.getKey(), QueryBuilder.Query.ORDER_BY.ASC);
             retorno = service.execute(query.toString());
         } catch (IllegalAccessException | InstantiationException | OlivaDevelopException e) {
             logger.error(e);

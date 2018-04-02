@@ -131,6 +131,7 @@ public class BasicEntity implements Serializable {
                             Entity ent = this.getClass().getAnnotation(Entity.class);
                             fName = ent.table() + "." + fName;
                             Object value = json.get(fName);
+
                             if (Utils.isNull(oto)) {
                                 OneToOne oneToOne = field.getAnnotation(OneToOne.class);
                                 BasicEntity elem = (BasicEntity) oneToOne.mappingClass().getConstructor(JSONObject.class).newInstance(value);
